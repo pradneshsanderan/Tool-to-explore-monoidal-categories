@@ -3,6 +3,7 @@ import java.util.Stack;
 public class State {
     String name;
     boolean identity;
+    Morphisms identityMorphism;
 
     State(String name){
         this.name = name;

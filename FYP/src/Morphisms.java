@@ -9,4 +9,14 @@ public class Morphisms {
         this.stateB = stateB;
     }
 
+    public State getNextState(){
+        return stateB;
+    }
+    public State getOriginState(){
+        return stateA;
+    }
+    public String getName(){
+        return name;
+    }
+
 }
