@@ -1,28 +1,85 @@
-public class Main {
-    public static void main(String[] args) {
-        /**
-         * TODO
-         * make a new class to represent the graph
-         * add functions to the graph so its easier to check associativity
-         * functions neeeded:
-         *  getStates()
-         *  getMorphisms()
-         *  getNextState(morphism m)
-         *  getIncomingMorphisms(state s)
-         *  getOutgoingMorphisms(state s)
-         *  getIdentity(state s)
-         *  checkAssociativity(state a, state b, state c)
-         *
-         */
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-        /**\
-         * DATA STRUCTURE NOTES
-         * bulid a new class to represent the graphs
-         * the class will have states and morphisms connecting the states
-         * option 1 use a hashmap. states as keys and a list of morphisms in the graph as values
-         * issue: how to know if the state is incoming or outgoing? and how to know which state it goes to?
-         *
-         */
+public class Main {
+
+    public static String path = "C:\\Users\\pradn\\Desktop\\Book1.csv";
+    public  static List<String> readLines = new ArrayList<>();
+    public static List<State> states;
+    public  static List<Morphisms> morphisms;
+
+
+
+    /**
+     * TODO
+     *
+     *  check if each state has an identity
+     *  cycle through the morphisms just like in the table and check that they all follow the associativity law
+     *
+     *
+     */
+
+    /**
+     * CSV FILE FORMAT
+     *
+     * first list all states, then followed by a morphism followed by 2 states
+     * Eg:
+     * A1,A2,A3, f1,A1,A2, f2,A2,A2,f3,A2,A3
+     */
+    public static void main(String[] args) {
+        readFile();
+        formatLines();
+        Graph g = new Graph(states,morphisms);
+        //check 1. check if all the states have identites.
+        System.out.println(hasIdentity(g));
 
     }
+
+    public static void readFile(){
+        String line = "";
+        try{
+            BufferedReader br = new BufferedReader( new FileReader(path));
+            while((line = br.readLine())!= null){
+                readLines.add(line);
+            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void formatLines(){
+        //split the states and add them to the list
+        String[] stateArr = readLines.get(0).split(",");
+        for (String s : stateArr) {
+            State a = new State(s);
+            states.add(a);
+        }
+        for(int i=1;i<readLines.size();i++){
+            String currLine = readLines.get(i);
+            String[] splittedLine = currLine.split(",");
+            State a = new State(splittedLine[1]);
+            State b = new State(splittedLine[2]);
+            Morphisms m = new Morphisms(a,b,splittedLine[0]);
+            morphisms.add(m);
+        }
+
+
+    }
+    public static  boolean hasIdentity(Graph g){
+        List<State> states1 = g.states;
+        for (State state : states1) {
+            if (!state.hasIdentity()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
 }
