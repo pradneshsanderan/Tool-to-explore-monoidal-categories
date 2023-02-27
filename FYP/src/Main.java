@@ -3,14 +3,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
 
     public static String path = "C:\\Users\\pradn\\Desktop\\Book1.csv";
     public  static List<String> readLines = new ArrayList<>();
-    public static List<State> states;
-    public  static List<Morphisms> morphisms;
+    public static List<State> states = new ArrayList<>();
+    public  static List<Morphisms> morphisms = new ArrayList<>();
 
 
 
@@ -35,8 +36,21 @@ public class Main {
         formatLines();
         Graph g = new Graph(states,morphisms);
         //check 1. check if all the states have identites.
-        int[][] table = new int[g.morphisms.size()][g.morphisms.size()];
-        System.out.println(hasIdentity(g));
+        if(hasIdentity(g)){
+            //check if it obeys the associativity law
+            System.out.println("has identity");
+            String[][] table = g.returnTable();
+            if(table[0][0].equals("ERROR")){
+                System.out.println("The category has no solutions");
+            }
+            else{
+                System.out.println(Arrays.deepToString(table).replace("],","]\n"));
+            }
+        }
+        else{
+            System.out.println("The category has no solutions");
+        }
+
 
     }
 
