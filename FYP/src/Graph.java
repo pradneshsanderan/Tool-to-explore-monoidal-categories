@@ -6,9 +6,9 @@ import java.util.List;
 public class Graph {
     List<State> states = new ArrayList<>();
     List<Morphisms> morphisms = new ArrayList<>();
-    HashMap<State,List<Morphisms>> mapA = new HashMap<>();
-    HashMap<State,List<Morphisms>> mapB = new HashMap<>();
-    HashMap<State,Morphisms> identities = new HashMap<>();
+    HashMap<String,List<Morphisms>> mapA = new HashMap<>();
+    HashMap<String,List<Morphisms>> mapB = new HashMap<>();
+    HashMap<String,Morphisms> identities = new HashMap<>();
     Graph(List<State> states,List<Morphisms> morphisms){
         this.states = states;
         this.morphisms = morphisms;
@@ -22,21 +22,22 @@ public class Graph {
 
     private void setMapA(){
         for (Morphisms curr : morphisms) {
-            if (mapA.containsKey(curr.stateA)) {
-                List<Morphisms> a = mapA.get(curr.stateA);
+            if (mapA.containsKey(curr.stateA.name)) {
+                List<Morphisms> a = mapA.get(curr.stateA.name);
                 a.add(curr);
-                mapA.remove(curr.stateA);
-                mapA.put(curr.stateA, a);
+                mapA.remove(curr.stateA.name);
+                mapA.put(curr.stateA.name, a);
             } else {
                 List<Morphisms> a = new ArrayList<>();
-                mapA.put(curr.stateA, a);
+                mapA.put(curr.stateA.name, a);
             }
 
-            if(curr.stateB == curr.stateA){
+            if(curr.stateB.name.equals( curr.stateA.name)){
                 curr.stateB.identity = true;
+                curr.stateA.identity =true;
                 curr.stateB.identityMorphism = curr;
-                identities.put(curr.stateA,curr);
-                identities.put(curr.stateB,curr);
+                identities.put(curr.stateA.name,curr);
+                identities.put(curr.stateB.name,curr);
 
             }
         }
@@ -45,14 +46,14 @@ public class Graph {
 
     private void setMapB(){
         for (Morphisms curr : morphisms) {
-            if (mapB.containsKey(curr.stateB)) {
-                List<Morphisms> a = mapB.get(curr.stateB);
+            if (mapB.containsKey(curr.stateB.name)) {
+                List<Morphisms> a = mapB.get(curr.stateB.name);
                 a.add(curr);
-                mapB.remove(curr.stateB);
-                mapB.put(curr.stateB, a);
+                mapB.remove(curr.stateB.name);
+                mapB.put(curr.stateB.name, a);
             } else {
                 List<Morphisms> a = new ArrayList<>();
-                mapB.put(curr.stateB, a);
+                mapB.put(curr.stateB.name, a);
             }
         }
     }
@@ -67,26 +68,29 @@ public class Graph {
     }
 
     public List<Morphisms> getOutgoingMorphisms(State s){
-        return mapA.get(s);
+        return mapA.get(s.name);
     }
 
     public List<Morphisms> getIncomingMorphisms(State s){
-        return mapB.get(s);
+        return mapB.get(s.name);
     }
     public Morphisms getIdentity(State s){
-        return identities.get(s);
+        return identities.get(s.name);
     }
     private class AssocRet{
         private boolean assoc;
         private Morphisms morph;
     }
+    public boolean hasIdentities(){
+        return identities.size()==states.size();
+    }
 
 
     public AssocRet checkAssociativity(State a, State b, State c){
         boolean firstTwo = false;
-        List<Morphisms> morpA = getOutgoingMorphisms(a);
+        List<Morphisms> morpA = mapA.get(a.name);
         for (Morphisms curr : morpA) {
-            if (curr.stateB == b) {
+            if (curr.stateB.name.equals(b.name)) {
                 firstTwo = true;
                 break;
             }
@@ -95,14 +99,14 @@ public class Graph {
         if(firstTwo){
             List<Morphisms> morphB = getOutgoingMorphisms(b);
             for (Morphisms curr : morphB) {
-                if (curr.stateB == c) {
+                if (curr.stateB.name.equals(c.name)) {
                     secondTwo = true;
                     break;
                 }
             }
             if(secondTwo){
                 for (Morphisms curr : morpA) {
-                    if (curr.stateB == c) {
+                    if (curr.stateB.name.equals(c.name)) {
                         AssocRet ret = new AssocRet();
                         ret.morph = curr;
                         ret.assoc = true;
@@ -132,21 +136,25 @@ public class Graph {
         String[][] table = new String[morphisms.size()][morphisms.size()];
         outerloop:
         for(int i=0;i< morphisms.size();i++){
-            Morphisms row = morphisms.get(0);
+            Morphisms row = morphisms.get(i);
             for( int j=0;j< morphisms.size();j++){
-                Morphisms col = morphisms.get(0);
+                Morphisms col = morphisms.get(j);
                 //cycle through the morphisms and fill up the table.
-                State rowStateA = row.stateA;
-                State rowStateB = row.stateB;
-                State colStateA = col.stateA;
-                State colStateB = col.stateB;
-                if(rowStateB==colStateA){
-                    if(rowStateA == rowStateB && colStateA == colStateB){
+                String rowStateA = row.stateA.name;
+                String rowStateB = row.stateB.name;
+                String colStateA = col.stateA.name;
+                String colStateB = col.stateB.name;
+//                System.out.println(rowStateA);
+//                System.out.println(rowStateB);
+//                System.out.println(colStateA);
+//                System.out.println(colStateB);
+                if(rowStateB.equals(colStateA)){
+                    if(rowStateA .equals( rowStateB) && colStateA.equals( colStateB)){
                         //both the identity morphism
                         table[i][j] = row.name;
-                    } else if (rowStateA!= rowStateB && colStateA!=colStateB) {
+                    } else if (!rowStateA.equals(rowStateB) && !colStateA.equals(colStateB)) {
                         // we have 3 different states, and we need to check associativity law
-                        AssocRet assoc = checkAssociativity(rowStateA,rowStateB,colStateB);
+                        AssocRet assoc = checkAssociativity(row.stateA,row.stateB,col.stateB);
                         if(assoc.assoc){
                             table[i][j] = assoc.morph.name;
                         }
@@ -158,7 +166,7 @@ public class Graph {
                     else{
                         //identity followed by normal or normal followed by identity
                         // identity follwed by normal
-                        if(rowStateA==rowStateB){
+                        if(rowStateA.equals(rowStateB)){
                             table[i][j] = col.name;
 
                          //normal followed by identity

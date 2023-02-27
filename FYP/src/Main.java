@@ -36,9 +36,8 @@ public class Main {
         formatLines();
         Graph g = new Graph(states,morphisms);
         //check 1. check if all the states have identites.
-        if(hasIdentity(g)){
+        if(g.hasIdentities()){
             //check if it obeys the associativity law
-            System.out.println("has identity");
             String[][] table = g.returnTable();
             if(table[0][0].equals("ERROR")){
                 System.out.println("The category has no solutions");
@@ -80,19 +79,12 @@ public class Main {
             State b = new State(splittedLine[2]);
             Morphisms m = new Morphisms(a,b,splittedLine[0]);
             morphisms.add(m);
+
         }
 
 
     }
-    public static  boolean hasIdentity(Graph g) {
-        List<State> states1 = g.states;
-        for (State state : states1) {
-            if (!state.hasIdentity()) {
-                return false;
-            }
-        }
-        return true;
-    }
+
 
 
 
