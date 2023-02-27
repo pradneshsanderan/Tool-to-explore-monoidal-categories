@@ -35,6 +35,7 @@ public class Main {
         formatLines();
         Graph g = new Graph(states,morphisms);
         //check 1. check if all the states have identites.
+        int[][] table = new int[g.morphisms.size()][g.morphisms.size()];
         System.out.println(hasIdentity(g));
 
     }
@@ -69,7 +70,7 @@ public class Main {
 
 
     }
-    public static  boolean hasIdentity(Graph g){
+    public static  boolean hasIdentity(Graph g) {
         List<State> states1 = g.states;
         for (State state : states1) {
             if (!state.hasIdentity()) {

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class Graph {
@@ -105,4 +106,55 @@ public class Graph {
         }
         return false;
     }
+
+    public boolean twoStateALink(State a,State b){
+        List<Morphisms> morpA = getOutgoingMorphisms(a);
+        for (Morphisms curr : morpA) {
+            if (curr.stateB == b) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public String[][] returnTable(){
+        Morphisms[][] table = new Morphisms[morphisms.size()][morphisms.size()];
+        for(int i=0;i< morphisms.size();i++){
+            Morphisms row = morphisms.get(0);
+            for( int j=0;j< morphisms.size();j++){
+                Morphisms col = morphisms.get(0);
+                //cycle through the morphisms and fill up the table.
+                State rowStateA = row.stateA;
+                State rowStateB = row.stateB;
+                State colStateA = col.stateA;
+                State colStateB = col.stateB;
+                if(rowStateA!= colStateA){
+                    table[i][j] = null;
+                    break;
+                }
+                if(rowStateB == colStateB){
+
+
+
+
+
+
+
+
+                }
+
+
+
+
+
+
+
+
+            }
+        }
+
+    }
+
+
 }
