@@ -2,9 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -89,7 +87,39 @@ public class Main {
                 System.out.println("The category has no solutions");
             }
             else{
-                System.out.println(Arrays.deepToString(table).replace("],","]\n"));
+                HashMap<Graph.Coordinates,List<Morphisms>> combinations = g.combinations;
+                List<String[][]> tablesList = new ArrayList<>();
+                tablesList.add(table);
+                List<Graph.Coordinates> combosList = g.comboList;
+//                System.out.println(combosList.size());
+                for(int i=0;i<combosList.size();i++){
+                    Graph.Coordinates curr = combosList.get(i);
+                    List<Morphisms> currList = combinations.get(curr);
+//                    System.out.println(currList.size());
+                    for(int j=0;j<currList.size();j++){
+                        Morphisms currMorphism = currList.get(j);
+                        //query the list of tables, change the val and add it in.
+                        int size = tablesList.size();
+                        for(int k=0;k<size;k++){
+                            String[][] tableA = tablesList.get(k).clone();
+                            if(!Objects.equals(tableA[curr.row][curr.col], currMorphism.name)){
+                                tableA[curr.row][curr.col] = currMorphism.name;
+                                tablesList.add(tableA);
+                            }
+
+                        }
+                    }
+                }
+//                System.out.println(tablesList.size());
+                for(int i=0;i<tablesList.size();i++){
+                    String[][] tableA = tablesList.get(i);
+
+                    System.out.println("Table "+ i);
+                    System.out.println(Arrays.deepToString(tableA).replace("],","]\n"));
+                    System.out.println(" ");
+
+                }
+
             }
         }
         else{
