@@ -6,6 +6,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
+/**
+ * Finite monoidal categories generalise finite monoids, and can be defined by giving their multiplication table.
+ * They are interesting from many perspectives, including programming semantics and quantum theory, but in this
+ * project we'll forget that and regard them as combinatorial objects, purely in terms of their multiplication table.
+ * This has applications in cryptography and is interesting in its own right. We want to explore which multiplication
+ * tables are possible. If I give you a multiplication table, can you check whether it defines a legal monoidal category?
+ * If I give you a multiplication table that is only partially filled, can you check whether it can be completed to a
+ * legal monoidal category? In this project you will write a tool with a graphical UI that implements these questions,
+ * either for finite monoidal categories or for finite 2-categories. A partial tool exists, written in Haskell and
+ * using a SAT-solver backend, that could be extended, but you can also restart from scratch and use a different
+ * platform. If all goes well we could add features to check for example whether two elements of a given
+ * multiplication table are adjoint.
+ */
 public class Main {
 
     public static String path = "C:\\Users\\pradn\\Desktop\\Book1.csv";
@@ -13,21 +27,6 @@ public class Main {
     public static List<State> states = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
 
-
-
-    /**
-     * TODO
-     *Add java docs for each class and method in each class
-     *
-     */
-
-    /**
-     * CSV FILE FORMAT
-     *
-     * first list all states, then followed by a morphism followed by 2 states
-     * Eg:
-     * A1,A2,A3, f1,A1,A2, f2,A2,A2,f3,A2,A3
-     */
 
 
     /**
@@ -69,6 +68,15 @@ public class Main {
      *
      *
      */
+
+
+    /**
+     * the main method of the class. it first reads the file stated in the path, calls the method to format the lines.
+     * it then first checks if the category has any identities. then if there is a valid solution.
+     * if a valid solution exists, then it prints out the table. otherwise it prints
+     * "The category has no solutions"
+     * @param args
+     */
     public static void main(String[] args) {
         readFile();
         formatLines();
@@ -91,6 +99,14 @@ public class Main {
 
     }
 
+    /**
+     * Reads a CSV file containing the states and morphisms and adds each line to a list of Strings.
+     * the file is taken from its path which is stored in the path variable.
+     * the format of the contents in the file is as follows.
+     * first list all states, then followed by a morphism followed by 2 states
+     *      * Eg:
+     *      * A1,A2,A3, \n f1,A1,A2,\n  f2,A2,A2,\n f3, A2,A3
+     */
     public static void readFile(){
         String line = "";
         try{
@@ -103,6 +119,13 @@ public class Main {
         }
     }
 
+    /**
+     * Formats the String lines stored by readFile in readLines
+     * the method splits the first line into different states and creates a new state object.
+     * the states are stored in the states list.
+     * for the morphisms, the method splits the string into an array of size 3 and creates a new morphism.
+     * it then stores each morphism in the morphisms list
+     */
     public static void formatLines(){
         //split the states and add them to the list
         String[] stateArr = readLines.get(0).split(",");

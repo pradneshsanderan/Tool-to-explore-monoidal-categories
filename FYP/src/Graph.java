@@ -9,6 +9,12 @@ public class Graph {
     HashMap<String,List<Morphisms>> mapA = new HashMap<>();
     HashMap<String,List<Morphisms>> mapB = new HashMap<>();
     HashMap<String,Morphisms> identities = new HashMap<>();
+
+    /**
+     * the constructor for the class
+     * @param states a list of states that got inputted
+     * @param morphisms a list of morphisms that got inputted
+     */
     Graph(List<State> states,List<Morphisms> morphisms){
         this.states = states;
         this.morphisms = morphisms;
@@ -17,9 +23,12 @@ public class Graph {
     }
 
 
-
-
-
+    /**
+     * the method reads through the list of morphisms and states and adds each state to a hashmap
+     * where the key is the states name and the value is a list of morphisms that have said state as the domain
+     * the method also sets the identity of a state to true and adds it to the identities list if it recognises it as
+     * an identity.
+     */
     private void setMapA(){
         for (Morphisms curr : morphisms) {
             if (mapA.containsKey(curr.stateA.name)) {
@@ -44,6 +53,11 @@ public class Graph {
     }
 
 
+    /**
+     * the method reads through the list of morphisms and states and adds each state to a hashmap
+     * where the key is the states name and the value is a list of morphisms that have said state as the codomain
+
+     */
     private void setMapB(){
         for (Morphisms curr : morphisms) {
             if (mapB.containsKey(curr.stateB.name)) {
@@ -59,33 +73,75 @@ public class Graph {
     }
 
 
+    /**
+     *
+     * @return a list of states in the category
+     */
     public List<State> getStates(){
         return states;
     }
 
+    /**
+     *
+     * @return a list of morphisms in the category
+     */
     public List<Morphisms> getMorphisms(){
         return morphisms;
     }
 
+    /**
+     *
+     * @param s that state that we would like to get the morphisms for
+     * @return a list of morphisms that have state s as a domain
+     */
     public List<Morphisms> getOutgoingMorphisms(State s){
         return mapA.get(s.name);
     }
 
+    /**
+     *
+     * @param s that state that we would like to get the morphisms for
+     * @return a list of morphisms that have state s as a codomain
+     */
     public List<Morphisms> getIncomingMorphisms(State s){
         return mapB.get(s.name);
     }
+
+    /**
+     *
+     * @param s that state that we would like to get the morphism for
+     * @return the identity morphism for the state
+     */
     public Morphisms getIdentity(State s){
         return identities.get(s.name);
     }
+
+    /**
+     *  a new object that is used to return 2 values in the checkAssociativity() method
+     */
     private class AssocRet{
         private boolean assoc;
         private Morphisms morph;
     }
+
+    /**
+     *
+     * @return true if each state in the category has an identity
+     */
     public boolean hasIdentities(){
         return identities.size()==states.size();
     }
 
 
+    /**
+     * checks the associativity between 3 states. if there is a morphism between state a and state b, and there
+     * is a morphism between state b and state c then there must be a morphism between state a and state c for the
+     * category to be valid
+     * @param a A state
+     * @param b A state
+     * @param c A state
+     * @return true and the morphism connecting state c and a if it is valid. false and null otherwise.
+     */
     public AssocRet checkAssociativity(State a, State b, State c){
         boolean firstTwo = false;
         List<Morphisms> morpA = mapA.get(a.name);
@@ -121,10 +177,16 @@ public class Graph {
         return ret;
     }
 
+    /**
+     * checks if there is a morphism going from state a to state b
+     * @param a A state
+     * @param b A state
+     * @return true if there is a morphism going from state a to state b
+     */
     public boolean twoStateALink(State a,State b){
         List<Morphisms> morpA = getOutgoingMorphisms(a);
         for (Morphisms curr : morpA) {
-            if (curr.stateB == b) {
+            if (curr.stateB.name.equals(b.name)) {
                 return true;
             }
         }
@@ -132,6 +194,15 @@ public class Graph {
     }
 
 
+    /**
+     * fills up the multiplication table row by row. it first checks if the codomain of the first state
+     * is the same as the domain of the second one. if it is not, it sets the string to "-". if there is,
+     * it first checks if it is an identity morphism,then if the domain of the fist, domain of the second and codomain
+     * of the second is different( then it calls checkAssociativity()) to check if its associative. if its not, it breaks
+     * and sets the first entry to ERROR to tell the main function that there is no solution) else it can be a morphism
+     * followed by identity or the other way around. then we just add the morphism to the table
+     * @return a table of the names of the morphisms representing a valid solution
+     */
     public String[][] returnTable(){
         String[][] table = new String[morphisms.size()][morphisms.size()];
         outerloop:
