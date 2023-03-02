@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Graph {
     List<State> states = new ArrayList<>();
@@ -370,6 +367,41 @@ public class Graph {
         return table;
 
     }
+
+
+
+    public void returnCombinations(String[][] t){
+        List<String[][]> tableList = new ArrayList<>();
+        tableList.add(t);
+        for(int i=0;i<comboList.size();i++){
+            Coordinates currCoordinate = comboList.get(i);
+            List<Morphisms> currList = combinations.get(currCoordinate);
+            int tableSize = tableList.size();
+            List<String> added = new ArrayList<>();
+            for(int j=0;j<currList.size();j++){
+                Morphisms currMorphism = currList.get(j);
+                for(int k=0;k<tableSize;k++){
+                    if(!added.contains(currMorphism.name)){
+                        String[][] tableA = tableList.get(k).clone();
+                        tableA[currCoordinate.row][currCoordinate.col] = currMorphism.name;
+                        tableList.add(tableA);
+                        added.add(currMorphism.name);
+                    }
+                }
+            }
+        }
+
+
+        for(int i=0;i<tableList.size();i++){
+
+
+            System.out.println("Table "+ i);
+            System.out.println(Arrays.deepToString(tableList.get(i)).replace("],","]\n"));
+            System.out.println(" ");
+
+        }
+    }
+
 
 
 
