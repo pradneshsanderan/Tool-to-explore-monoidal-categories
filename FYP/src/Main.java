@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\Cat5.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\Book1.csv";
     public  static List<String> readLines = new ArrayList<>();
     public static List<State> states = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -87,9 +87,10 @@ public class Main {
                 System.out.println("The category has no solutions");
             }
             else{
-                System.out.println("Table ");
-                System.out.println(Arrays.deepToString(table).replace("],","]\n"));
-                System.out.println(" ");
+                g.printTables(table);
+//                System.out.println("Table ");
+//                System.out.println(Arrays.deepToString(table).replace("],","]\n"));
+//                System.out.println(" ");
 //               g.returnCombinations(table);
 
 //                System.out.println(tablesList.size());

@@ -257,6 +257,13 @@ public class Graph {
                             } else if (hasRow) {
                                 table[i][j] = row.name;
                             }
+                            else{
+                                Coordinates c = new Coordinates();
+                                c.row = i;
+                                c.col = j;
+                                combinations.put(c,combos);
+                                comboList.add(c);
+                            }
                         }
                         else{
                             table[0][0]= "ERROR";
@@ -269,9 +276,10 @@ public class Graph {
                         AssocRet returnnedAssoc = twoStateALink(row.stateA,col.stateA);
                         if(rowStateA.equals(rowStateB)){
                             if(returnnedAssoc.assoc){
+                                table[i][j] = col.name;
                                 List<Morphisms> combos = new ArrayList<>(returnnedAssoc.morph);
-                                boolean hasCol = false;
                                 boolean hasRow = false;
+                                boolean hasCol = false;
                                 for(int f=0;f<combos.size();f++){
                                     if(combos.get(f).name.equals(col.name)){
                                         hasCol =true;
@@ -284,14 +292,15 @@ public class Graph {
                                         break ;
                                     }
                                 }
-                                if(hasCol){
-                                    table[i][j] = col.name;
-                                }else if (hasRow) {
+                                if(hasRow) {
                                     table[i][j] = row.name;
-
                                 }
-                                else{
-                                    table[i][j] = col.name;
+                                if(!hasRow && !hasCol){
+                                    Coordinates c = new Coordinates();
+                                    c.row = i;
+                                    c.col = j;
+                                    combinations.put(c,combos);
+                                    comboList.add(c);
                                 }
                             }
                             else{
@@ -300,6 +309,7 @@ public class Graph {
                          //normal followed by identity
                         }else{
                             if(returnnedAssoc.assoc){
+                                table[i][j] = row.name;
                                 List<Morphisms> combos = new ArrayList<>(returnnedAssoc.morph);
                                 boolean hasCol = false;
                                 boolean hasRow = false;
@@ -309,19 +319,15 @@ public class Graph {
                                         break ;
                                     }
                                 }
-                                for(int f=0;f<combos.size();f++){
-                                    if(combos.get(f).name.equals(row.name)){
-                                        hasRow =true;
-                                        break ;
-                                    }
-                                }
                                 if(hasCol){
                                     table[i][j] = col.name;
-                                }else if (hasRow) {
-                                    table[i][j] = row.name;
                                 }
-                                else{
-                                    table[i][j] = row.name;
+                                if(!hasRow && !hasCol){
+                                    Coordinates c = new Coordinates();
+                                    c.row = i;
+                                    c.col = j;
+                                    combinations.put(c,combos);
+                                    comboList.add(c);
                                 }
                             }
                             else{
@@ -336,6 +342,43 @@ public class Graph {
         }
         return table;
 
+    }
+
+
+    public void printTables(String[][] t){
+        //comboList is a list of coordinates with multiples entries
+        // combinations is a hashmap <Coordinate, List<Morphisms>>
+        int counter = 1;
+        System.out.println("Table 0");
+        System.out.println(Arrays.deepToString(t).replace("],","]\n"));
+        System.out.println(" ");
+        Queue<String[][]> tables = new LinkedList<>();
+        tables.add(t);
+        for(int i=0;i<comboList.size();i++){
+            Coordinates currCoordinate = comboList.get(i);
+            int size = tables.size();
+            innerLoop:
+            for(int j=0;j<size;j++){
+                if(tables.peek()==null){
+                    break innerLoop;
+                }
+                String[][] currTableA = tables.poll();
+                String[][] currTable = currTableA.clone();
+                List<Morphisms> morphisms = combinations.get(currCoordinate);
+                for(int k=0;k<morphisms.size();k++){
+                    Morphisms currMorphism = morphisms.get(k);
+                    if(!currTable[currCoordinate.row][currCoordinate.col].equals(currMorphism.name)){
+                        currTable[currCoordinate.row][currCoordinate.col]=currMorphism.name;
+                        System.out.println("Table "+counter);
+                        counter++;
+                        System.out.println(Arrays.deepToString(currTable).replace("],","]\n"));
+                        System.out.println(" ");
+                        tables.add(currTable);
+                    }
+                }
+                tables.add(currTableA);
+            }
+        }
     }
 
 
