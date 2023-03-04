@@ -228,10 +228,6 @@ public class Graph {
                 String rowStateB = row.stateB.name;
                 String colStateA = col.stateA.name;
                 String colStateB = col.stateB.name;
-//                System.out.println(rowStateA);
-//                System.out.println(rowStateB);
-//                System.out.println(colStateA);
-//                System.out.println(colStateB);
                 if(rowStateB.equals(colStateA)){
                     if(rowStateA .equals( rowStateB) && colStateA.equals( colStateB)){
                         //both the identity morphism
@@ -256,20 +252,11 @@ public class Graph {
                                     break ;
                                 }
                             }
-
                             if(hasCol){
                                 table[i][j] = col.name;
                             } else if (hasRow) {
                                 table[i][j] = row.name;
-
-                            } else{
-                                Coordinates c = new Coordinates();
-                                c.row =i;
-                                c.col = j;
-                                combinations.put(c,combos);
-                                comboList.add(c);
                             }
-
                         }
                         else{
                             table[0][0]= "ERROR";
@@ -278,7 +265,7 @@ public class Graph {
                     }
                     else{
                         //identity followed by normal or normal followed by identity
-                        // identity follwed by normal
+                        // Identity followed by normal
                         AssocRet returnnedAssoc = twoStateALink(row.stateA,col.stateA);
                         if(rowStateA.equals(rowStateB)){
                             if(returnnedAssoc.assoc){
@@ -304,22 +291,12 @@ public class Graph {
 
                                 }
                                 else{
-                                    Coordinates c = new Coordinates();
-                                    c.row =i;
-                                    c.col = j;
-                                    combinations.put(c,combos);
-                                    table[i][j] = combos.get(0).name;
-                                    comboList.add(c);
+                                    table[i][j] = col.name;
                                 }
-
                             }
                             else{
                                 table[i][j] = col.name;
                             }
-                            /**
-                             * if the col is a certain morphism, it can only be that morphism
-                             */
-
                          //normal followed by identity
                         }else{
                             if(returnnedAssoc.assoc){
@@ -342,21 +319,14 @@ public class Graph {
                                     table[i][j] = col.name;
                                 }else if (hasRow) {
                                     table[i][j] = row.name;
-
                                 }
                                 else{
-                                    Coordinates c = new Coordinates();
-                                    c.row =i;
-                                    c.col = j;
-                                    combinations.put(c,combos);
-                                    table[i][j] = combos.get(0).name;
-                                    comboList.add(c);
+                                    table[i][j] = row.name;
                                 }
                             }
                             else{
                                 table[i][j] = row.name;
                             }
-
                         }
                     }
                 } else{
@@ -370,38 +340,237 @@ public class Graph {
 
 
 
-    public void returnCombinations(String[][] t){
-        List<String[][]> tableList = new ArrayList<>();
-        tableList.add(t);
-        for(int i=0;i<comboList.size();i++){
-            Coordinates currCoordinate = comboList.get(i);
-            List<Morphisms> currList = combinations.get(currCoordinate);
-            int tableSize = tableList.size();
-            List<String> added = new ArrayList<>();
-            for(int j=0;j<currList.size();j++){
-                Morphisms currMorphism = currList.get(j);
-                for(int k=0;k<tableSize;k++){
-                    if(!added.contains(currMorphism.name)){
-                        String[][] tableA = tableList.get(k).clone();
-                        tableA[currCoordinate.row][currCoordinate.col] = currMorphism.name;
-                        tableList.add(tableA);
-                        added.add(currMorphism.name);
-                    }
-                }
-            }
-        }
 
 
-        for(int i=0;i<tableList.size();i++){
 
 
-            System.out.println("Table "+ i);
-            System.out.println(Arrays.deepToString(tableList.get(i)).replace("],","]\n"));
-            System.out.println(" ");
 
-        }
-    }
 
+
+
+
+
+
+
+
+
+
+
+
+
+//    public void returnCombinations(String[][] t){
+//        List<String[][]> tableList = new ArrayList<>();
+//        tableList.add(t);
+//        /**for every coordinate*/
+//        for(int i=0;i<comboList.size();i++){
+//            Coordinates currCoordinate = comboList.get(i);
+//            List<Morphisms> currList = combinations.get(currCoordinate);
+//            int tableSize = tableList.size();
+//            System.out.println(tableSize);
+//            System.out.println(currCoordinate.row + "   " + currCoordinate.col);
+//            List<String> added = new ArrayList<>();
+//            added.add(t[currCoordinate.row][currCoordinate.col]);
+//            /**for every morphism*/
+//            for(int j=0;j<currList.size();j++){
+//                Morphisms currMorphism = currList.get(j);
+//                System.out.println("curr morphism "+ currMorphism.name);
+//                /**for every table in the list*/
+//                for(int k=0;k<tableSize;k++){
+//                    if(!added.contains(currMorphism.name)){
+//                        System.out.println("inside");
+//                        String[][] tableA = tableList.get(k).clone();
+//                        tableA[currCoordinate.row][currCoordinate.col] = currMorphism.name;
+//                        tableList.add(tableA);
+//                        added.add(currMorphism.name);
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//        for(int i=0;i<tableList.size();i++){
+//
+//
+//            System.out.println("Table "+ i);
+//            System.out.println(Arrays.deepToString(tableList.get(i)).replace("],","]\n"));
+//            System.out.println(" ");
+//
+//        }
+//    }
+
+
+
+//
+//    public String[][] returnTable(){
+//        String[][] table = new String[morphisms.size()][morphisms.size()];
+//        outerloop:
+//        for(int i=0;i< morphisms.size();i++){
+//            Morphisms row = morphisms.get(i);
+//            for( int j=0;j< morphisms.size();j++){
+//                Morphisms col = morphisms.get(j);
+//                //cycle through the morphisms and fill up the table.
+//                String rowStateA = row.stateA.name;
+//                String rowStateB = row.stateB.name;
+//                String colStateA = col.stateA.name;
+//                String colStateB = col.stateB.name;
+////                System.out.println(rowStateA);
+////                System.out.println(rowStateB);
+////                System.out.println(colStateA);
+////                System.out.println(colStateB);
+//                if(rowStateB.equals(colStateA)){
+//                    if(rowStateA .equals( rowStateB) && colStateA.equals( colStateB)){
+//                        //both the identity morphism
+//                        table[i][j] = row.name;
+//                    } else if (!rowStateA.equals(rowStateB) && !colStateA.equals(colStateB)) {
+//                        // we have 3 different states, and we need to check associativity law
+//                        AssocRet assoc = checkAssociativity(row.stateA,row.stateB,col.stateB);
+//                        if(assoc.assoc){
+//                            table[i][j] = assoc.morph.get(0).name;
+//                            List<Morphisms> combos = new ArrayList<>(assoc.morph);
+//                            boolean hasCol = false;
+//                            boolean hasRow = false;
+//                            for(int f=0;f<combos.size();f++){
+//                                if(combos.get(f).name.equals(col.name) ){
+//                                    hasCol =true;
+//                                    break ;
+//                                }
+//                            }
+//                            for(int f=0;f<combos.size();f++){
+//                                if(combos.get(f).name.equals(row.name)){
+//                                    hasRow =true;
+//                                    break ;
+//                                }
+//                            }
+//
+//                            if(hasCol){
+//                                table[i][j] = col.name;
+//                            } else if (hasRow) {
+//                                table[i][j] = row.name;
+//                            }
+////                            } else{
+////                                Coordinates c = new Coordinates();
+////                                c.row =i;
+////                                c.col = j;
+////                                combinations.put(c,combos);
+////                                comboList.add(c);
+////                            }
+//
+//                        }
+//                        else{
+//                            table[0][0]= "ERROR";
+//                            break outerloop;
+//                        }
+//                    }
+//                    else{
+//                        //identity followed by normal or normal followed by identity
+//                        //  follwed by normal
+//                        AssocRet returnnedAssoc = twoStateALink(row.stateA,col.stateA);
+//                        if(rowStateA.equals(rowStateB)){
+//                            if(returnnedAssoc.assoc){
+//                                List<Morphisms> combos = new ArrayList<>(returnnedAssoc.morph);
+//                                boolean hasCol = false;
+//                                boolean hasRow = false;
+//                                for(int f=0;f<combos.size();f++){
+//                                    if(combos.get(f).name.equals(col.name)){
+//                                        hasCol =true;
+//                                        break ;
+//                                    }
+//                                }
+//                                for(int f=0;f<combos.size();f++){
+//                                    if(combos.get(f).name.equals(row.name)){
+//                                        hasRow =true;
+//                                        break ;
+//                                    }
+//                                }
+//                                if(hasCol){
+//                                    table[i][j] = col.name;
+//                                }else if (hasRow) {
+//                                    table[i][j] = row.name;
+//
+//                                }
+//                                else{
+//                                    table[i][j] = col.name;
+//                                }
+////                                if(hasCol){
+////                                    table[i][j] = col.name;
+////                                }else if (hasRow) {
+////                                    table[i][j] = row.name;
+////
+////                                }
+////                                else{
+////                                    Coordinates c = new Coordinates();
+////                                    c.row =i;
+////                                    c.col = j;
+////                                    combinations.put(c,combos);
+////                                    table[i][j] = combos.get(0).name;
+////                                    comboList.add(c);
+////                                }
+//
+//                            }
+//                            else{
+//                                table[i][j] = col.name;
+//                            }
+//                            /**
+//                             * if the col is a certain morphism, it can only be that morphism
+//                             */
+//
+//                            //normal followed by identity
+//                        }else{
+//                            if(returnnedAssoc.assoc){
+//                                List<Morphisms> combos = new ArrayList<>(returnnedAssoc.morph);
+//                                boolean hasCol = false;
+//                                boolean hasRow = false;
+//                                for(int f=0;f<combos.size();f++){
+//                                    if(combos.get(f).name.equals(col.name)){
+//                                        hasCol =true;
+//                                        break ;
+//                                    }
+//                                }
+//                                for(int f=0;f<combos.size();f++){
+//                                    if(combos.get(f).name.equals(row.name)){
+//                                        hasRow =true;
+//                                        break ;
+//                                    }
+//                                }
+//                                if(hasCol){
+//                                    table[i][j] = col.name;
+//                                }else if (hasRow) {
+//                                    table[i][j] = row.name;
+//
+//                                }
+//                                else{
+//                                    table[i][j] = row.name;
+//                                }
+//
+////                                if(hasCol){
+////                                    table[i][j] = col.name;
+////                                }else if (hasRow) {
+////                                    table[i][j] = row.name;
+////
+////                                }
+////                                else{
+////                                    Coordinates c = new Coordinates();
+////                                    c.row =i;
+////                                    c.col = j;
+////                                    combinations.put(c,combos);
+////                                    table[i][j] = combos.get(0).name;
+////                                    comboList.add(c);
+////                                }
+//                            }
+//                            else{
+//                                table[i][j] = row.name;
+//                            }
+//
+//                        }
+//                    }
+//                } else{
+//                    table[i][j]= "-";
+//                }
+//            }
+//        }
+//        return table;
+//
+//    }
 
 
 
