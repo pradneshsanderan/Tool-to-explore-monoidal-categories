@@ -205,6 +205,15 @@ public class Graph {
         ret.morph =combos;
         return ret;
     }
+    private String[][] copier(String[][] s){
+        String[][] ret = new String[s.length][s.length];
+        for(int i=0;i<s.length;i++){
+            for(int j=0;j<s.length;j++){
+                ret[i][j] = s[i][j];
+            }
+        }
+        return ret;
+    }
 
 
     /**
@@ -319,6 +328,12 @@ public class Graph {
                                         break ;
                                     }
                                 }
+                                for(int f=0;f<combos.size();f++){
+                                    if(combos.get(f).name.equals(row.name)){
+                                        hasRow =true;
+                                        break ;
+                                    }
+                                }
                                 if(hasCol){
                                     table[i][j] = col.name;
                                 }
@@ -345,38 +360,41 @@ public class Graph {
     }
 
 
-    public void printTables(String[][] t){
+    public void printTables(){
         //comboList is a list of coordinates with multiples entries
         // combinations is a hashmap <Coordinate, List<Morphisms>>
+        String[][] t =returnTable();
+        if(t[0][0].equals("ERROR")){
+            System.out.println("The category has no solutions");
+            return;
+        }
         int counter = 1;
         System.out.println("Table 0");
         System.out.println(Arrays.deepToString(t).replace("],","]\n"));
         System.out.println(" ");
-        Queue<String[][]> tables = new LinkedList<>();
-        tables.add(t);
+        HashMap<Integer,String[][]> tables = new HashMap<Integer, String[][]>();
+        tables.put(0,t);
+        int tracker =0;
+        int size =1;
         for(int i=0;i<comboList.size();i++){
             Coordinates currCoordinate = comboList.get(i);
-            int size = tables.size();
             innerLoop:
+            size = tables.size();
             for(int j=0;j<size;j++){
-                if(tables.peek()==null){
-                    break innerLoop;
-                }
-                String[][] currTableA = tables.poll();
-                String[][] currTable = currTableA.clone();
+                String[][] currTable = copier(tables.get(j));
                 List<Morphisms> morphisms = combinations.get(currCoordinate);
                 for(int k=0;k<morphisms.size();k++){
                     Morphisms currMorphism = morphisms.get(k);
                     if(!currTable[currCoordinate.row][currCoordinate.col].equals(currMorphism.name)){
                         currTable[currCoordinate.row][currCoordinate.col]=currMorphism.name;
                         System.out.println("Table "+counter);
-                        counter++;
                         System.out.println(Arrays.deepToString(currTable).replace("],","]\n"));
                         System.out.println(" ");
-                        tables.add(currTable);
+                        counter++;
+                        tracker++;
+                        tables.put(tracker,currTable);
                     }
                 }
-                tables.add(currTableA);
             }
         }
     }

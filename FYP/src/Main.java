@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\Book1.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\Cat5.csv";
     public  static List<String> readLines = new ArrayList<>();
     public static List<State> states = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -81,22 +81,7 @@ public class Main {
         Graph g = new Graph(states,morphisms);
         //check 1. check if all the states have identites.
         if(g.hasIdentities()){
-            //check if it obeys the associativity law
-            String[][] table = g.returnTable();
-            if(table[0][0].equals("ERROR")){
-                System.out.println("The category has no solutions");
-            }
-            else{
-                g.printTables(table);
-//                System.out.println("Table ");
-//                System.out.println(Arrays.deepToString(table).replace("],","]\n"));
-//                System.out.println(" ");
-//               g.returnCombinations(table);
-
-//                System.out.println(tablesList.size());
-
-
-            }
+            g.printTables();
         }
         else{
             System.out.println("The category has no solutions");
