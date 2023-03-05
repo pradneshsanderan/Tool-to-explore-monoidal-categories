@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\Cat5.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\Cat5.csv";
     public  static List<String> readLines = new ArrayList<>();
     public static List<State> states = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -86,8 +86,6 @@ public class Main {
         else{
             System.out.println("The category has no solutions");
         }
-
-
     }
 
     /**
@@ -131,50 +129,6 @@ public class Main {
             State b = new State(splittedLine[2]);
             Morphisms m = new Morphisms(a,b,splittedLine[0]);
             morphisms.add(m);
-
         }
-
-
     }
-
-
-
-
-
 }
-
-
-//    HashMap<Graph.Coordinates,List<Morphisms>> combinations = g.combinations;
-//        List<String[][]> tablesList = new ArrayList<>();
-//        tablesList.add(table);
-//        List<Graph.Coordinates> combosList = g.comboList;
-////                System.out.println(combosList.size());
-//
-//        /**for each coordinate with multiple entries*/
-//        for(int i=0;i<combosList.size();i++){
-//        Graph.Coordinates curr = combosList.get(i);
-////                    System.out.println(curr.row + "..."+ curr.col);
-//        List<Morphisms> currList = combinations.get(curr);
-////                    System.out.println(currList.size());
-//        int size = tablesList.size();
-//        List<String> added = new ArrayList<>();
-//        /**for each morphism for that coordinate*/
-//        for(int j=0;j<currList.size();j++){
-//        Morphisms currMorphism = currList.get(j);
-////                        System.out.println(currMorphism.name);
-//        //query the list of tables, change the val and add it in.
-//        /**for each table in the list of tables*/
-//        for(int k=0;k<size;k++){
-//        if(!added.contains(currMorphism.name)){
-//        String[][] tableA = tablesList.get(k).clone();
-//        System.out.println(tableA[curr.row][curr.col]);
-//        tableA[curr.row][curr.col] = currMorphism.name;
-//        tablesList.add(tableA);
-//        added.add(currMorphism.name);
-//        }
-//
-//
-//
-//
-//        }
-//        }
