@@ -21,4 +21,8 @@ public class State {
     public boolean hasIdentity(){
         return  identity;
     }
+
+    public Morphisms getIdentityMorphism(){
+        return identityMorphism;
+    }
 }

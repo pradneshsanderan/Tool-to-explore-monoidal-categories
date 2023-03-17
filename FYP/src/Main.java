@@ -20,11 +20,14 @@ import java.util.*;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\Cat5.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\Book1.csv";
     public  static List<String> readLines = new ArrayList<>();
     public static List<State> states = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
-
+    public static  List<String> identityNames = new ArrayList<>();
+/**
+ * TODO change the program to take a multiplication table instead.
+ */
 
 
     /**
@@ -131,4 +134,84 @@ public class Main {
             morphisms.add(m);
         }
     }
+
+//TODO ASSUME VALID IDENTITY
+
+    /**
+     * Formats the String lines stored by readFile in readLines
+     * the method splits the first line into different states and creates a new state object.
+     * the states are stored in the states list.
+     * for the morphisms, the method splits the string into an array of size 3 and creates a new morphism.
+     * it then stores each morphism in the morphisms list
+     */
+    public static void formatMultTable(){
+        //Get Identities first
+        formatIdentities();
+        //if size of states is 0 here then we can conclude that it is not a valid category.
+
+    }
+
+
+    public static void formatIdentities(){
+        for(int i=0;i<readLines.size();i++){
+            String[] curr = readLines.get(i).split(",");
+            if(!curr[i].equals("-")){
+                State s = new State(Integer.toString(i));
+                Morphisms m = new Morphisms(s,s,curr[i]);
+                s.identity = true;
+                s.identityMorphism = m;
+                states.add(s);
+                identityNames.add(curr[i]);
+                morphisms.add(m);
+            }
+
+        }
+    }
+
+    public static void formatMorphs(){
+        HashMap<String,String> statesA = new HashMap<>();
+        HashMap<String,String> stateB = new HashMap<>();
+        List<String[]> rechecks = new ArrayList<>();
+        for(int i=0;i<readLines.size();i++){
+            String row = "f" + Integer.toString(i);
+            String[] curr = readLines.get(i).split(",");
+            for(int j =0;j<curr.length;j++){
+                String n = curr[j];
+                String col = "f" + Integer.toString(j);
+                if(row.equals(col) || n.equals("-")){
+                    continue;
+                }
+                if(identityNames.contains(row) && col.equals(n)){
+                    //start m = row
+                } else if (row.equals(n) && identityNames.contains(col)) {
+                    //end m = identity
+                }
+                else if (identityNames.contains(col) && identityNames.contains(row)){
+                    // invalid table
+                }
+                else {
+                    boolean ASet = false;
+                    boolean Bset = false;
+                    if (statesA.containsKey(row)){
+                        // m state A = row state A
+                        // Aset = true
+                    }
+                    if(stateB.containsKey(col)){
+                        //m end = col end
+                        //bset = true
+                    }
+                    if(!ASet && !Bset){
+                        //need to recheck later
+                        rechecks.add(new String[]{row,col});
+                    }
+
+                }
+                //check if any rechecks needed. otherwise can continue
+
+            }
+        }
+    }
+
+
+
 }
