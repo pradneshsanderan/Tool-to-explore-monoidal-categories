@@ -4,6 +4,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static java.lang.System.exit;
+
 
 /**
  * Finite monoidal categories generalise finite monoids, and can be defined by giving their multiplication table.
@@ -20,11 +22,15 @@ import java.util.*;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\Book1.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\cat1.csv";
     public  static List<String> readLines = new ArrayList<>();
     public static List<State> states = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
     public static  List<String> identityNames = new ArrayList<>();
+    public static HashMap<String,String> statesA = new HashMap<>();
+    public static HashMap<String,String> stateB = new HashMap<>();
+    public static List<int[]> rechecks = new ArrayList<>();
+
 /**
  * TODO change the program to take a multiplication table instead.
  */
@@ -80,15 +86,7 @@ public class Main {
      */
     public static void main(String[] args) {
         readFile();
-        formatLines();
-        Graph g = new Graph(states,morphisms);
-        //check 1. check if all the states have identites.
-        if(g.hasIdentities()){
-            g.printTables();
-        }
-        else{
-            System.out.println("The category has no solutions");
-        }
+        formatIdentities();
     }
 
     /**
@@ -166,12 +164,27 @@ public class Main {
             }
 
         }
+        formatMorphs();
+        while (rechecks.size()!=0){
+            doRechecks();
+        }
+        Set<String> stateAKeys = statesA.keySet();
+        Set<String> stateBKeys = stateB.keySet();
+        if(stateBKeys.size()!= stateAKeys.size()){
+            System.out.println("state a keys do not match state b keys");
+            exit(0);
+        }
+        for(String key : stateAKeys){
+            if(!stateB.containsKey(key)){
+                System.out.println("state a keys do not match state b keys 2");
+                exit(0);
+            }
+            Morphisms m = new Morphisms(getState(key),getState(stateB.get(key)),key);
+            morphisms.add(m);
+        }
     }
 
     public static void formatMorphs(){
-        HashMap<String,String> statesA = new HashMap<>();
-        HashMap<String,String> stateB = new HashMap<>();
-        List<String[]> rechecks = new ArrayList<>();
         for(int i=0;i<readLines.size();i++){
             String row = "f" + Integer.toString(i);
             String[] curr = readLines.get(i).split(",");
@@ -183,26 +196,62 @@ public class Main {
                 }
                 if(identityNames.contains(row) && col.equals(n)){
                     //start m = row
+                    if(statesA.containsKey(n)){
+                        if(!statesA.get(n).equals(col)){
+                            System.out.println("This is an invalid category 1");
+                            exit(0);
+                        }
+                    }
+                    else {
+                        statesA.put(n,col);
+                    }
                 } else if (row.equals(n) && identityNames.contains(col)) {
                     //end m = identity
+                    if(stateB.containsKey(n)){
+                        if(!stateB.get(n).equals(col)){
+                            System.out.println("This is an invalid category 2");
+                            exit(0);
+                        }
+                    }
+                    else {
+                        stateB.put(n,col);
+                    }
                 }
                 else if (identityNames.contains(col) && identityNames.contains(row)){
-                    // invalid table
+                    System.out.println("This is an invalid category3");
+                    exit(0);
                 }
                 else {
                     boolean ASet = false;
                     boolean Bset = false;
                     if (statesA.containsKey(row)){
                         // m state A = row state A
-                        // Aset = true
+                        if(statesA.containsKey(n)){
+                            if(!statesA.get(n).equals(statesA.get(row))){
+                                System.out.println("This is an invalid category 4");
+                                exit(0);
+                            }
+                        }else {
+                            statesA.put(n,statesA.get(row));
+                        }
+                        ASet = true;
                     }
                     if(stateB.containsKey(col)){
                         //m end = col end
-                        //bset = true
+                        if(stateB.containsKey(n)){
+                            if(!stateB.get(n).equals(stateB.get(col))){
+                                System.out.println("This is an invalid category 5");
+                                exit(0);
+                            }
+                        }else{
+                            stateB.put(n,stateB.get(col));
+                        }
+
+                        Bset = true;
                     }
                     if(!ASet && !Bset){
                         //need to recheck later
-                        rechecks.add(new String[]{row,col});
+                        rechecks.add(new int[]{i,j});
                     }
 
                 }
@@ -212,6 +261,96 @@ public class Main {
         }
     }
 
+
+    public static void doRechecks(){
+        List<int[]> rechecksdupl = new ArrayList<>();
+        for(int i=0;i<rechecks.size();i++){
+            int[] curr = rechecks.get(i);
+            int row_i = curr[0];
+            int col_j = curr[1];
+            String[] currSplit = readLines.get(row_i).split(",");
+            String n = currSplit[col_j];
+            String row = "f"+row_i;
+            String col = "f"+col_j;
+
+
+            if(row.equals(col) || n.equals("-")){
+                continue;
+            }
+            if(identityNames.contains(row) && col.equals(n)){
+                //start m = row
+                if(statesA.containsKey(n)){
+                    if(!statesA.get(n).equals(col)){
+                        System.out.println("This is an invalid category 6");
+                        exit(0);
+                    }
+                }
+                else {
+                    statesA.put(n,col);
+                }
+            } else if (row.equals(n) && identityNames.contains(col)) {
+                //end m = identity
+                if(stateB.containsKey(n)){
+                    if(!stateB.get(n).equals(col)){
+                        System.out.println("This is an invalid category 7");
+                        exit(0);
+                    }
+                }
+                else {
+                    stateB.put(n,col);
+                }
+            }
+            else if (identityNames.contains(col) && identityNames.contains(row)){
+                System.out.println("This is an invalid category 8");
+                exit(0);
+            }
+            else {
+                boolean ASet = false;
+                boolean Bset = false;
+                if (statesA.containsKey(row)){
+                    // m state A = row state A
+                    if(statesA.containsKey(n)){
+                        if(!statesA.get(n).equals(statesA.get(row))){
+                            System.out.println("This is an invalid category 9");
+                            exit(0);
+                        }
+                    }else {
+                        statesA.put(n,statesA.get(row));
+                    }
+                    ASet = true;
+                }
+                if(stateB.containsKey(col)){
+                    //m end = col end
+                    if(stateB.containsKey(n)){
+                        if(!stateB.get(n).equals(stateB.get(col))){
+                            System.out.println("This is an invalid category 10");
+                            exit(0);
+                        }
+                    }else{
+                        stateB.put(n,stateB.get(col));
+                    }
+
+                    Bset = true;
+                }
+                if(!ASet && !Bset){
+                    //need to recheck later
+                    rechecksdupl.add(new int[]{row_i,col_j});
+                }
+
+            }
+            //check if any rechecks needed. otherwise can continue
+        }
+        rechecks.clear();
+        rechecks = rechecksdupl;
+    }
+    public static  State getState(String name){
+        for(State s : states){
+            if(s.name.equals(name)){
+                return s;
+            }
+        }
+        return null;
+    }
 
 
 }
