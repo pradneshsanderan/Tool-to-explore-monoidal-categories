@@ -23,9 +23,18 @@ import static java.lang.System.exit;
 public class Main {
 
     public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\cat1.csv";
-    public  static List<String> readLines = new ArrayList<>();
-    public static List<State> states = new ArrayList<>();
+    public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\tensor1.csv";
+    public  static List<String> readTensor = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
+    public static List<Tensor> tensorList = new ArrayList<>();
+    public  static List<String> readLines = new ArrayList<>();
+    public static HashMap<String,Integer> tensorRow = new HashMap<>();
+    public static HashMap<String,Morphisms> morphismNames = new HashMap<>();
+    public static HashMap<String, Integer> tensorCol = new HashMap<>();
+    public static HashMap<String,Integer> catRow = new HashMap<>();
+    public static HashMap<String, Integer> catCol = new HashMap<>();
+    public static Morphisms[][] catTable = new Morphisms[morphisms.size()][morphisms.size()];
+    public static List<State> states = new ArrayList<>();
     public static  List<String> identityNames = new ArrayList<>();
     public static HashMap<String,String> statesA = new HashMap<>();
     public static HashMap<String,String> stateB = new HashMap<>();
@@ -39,40 +48,17 @@ public class Main {
     /**
      * TODO: THE MONOIDAL PART
      * A monoidal category is a category equipped with a tensor product and a unit object, subject to the following properties:
+     *  PROPERTIES TO CHECK:::
      *
-     *      1)Associativity: For any objects A, B, and C in the category, there is a natural isomorphism (A ⊗ B) ⊗ C ≅ A ⊗ (B ⊗ C).
+     *  dom(f * g) == dom(f) * dom(g)
      *
-     *      2)Unit: There exists a unit object I such that for any object A in the category, there are natural isomorphisms A ⊗ I ≅ A and I ⊗ A ≅ A.
+     *  codomain(f * g) == codomain(f) * codomain(g)
      *
-     *      3)Coherence: The associativity and unit isomorphisms are required to satisfy certain coherence conditions involving
-     *      higher-order associativity and commutativity isomorphisms.
+     *  (f * g) * h == f * (g * h)
      *
-     *      4)Compatibility with functors: Given two monoidal categories (C, ⊗, I) and (D, ⊙, J),
-     *      a monoidal functor F : C → D is a functor that preserves the tensor product and unit object,
-     *      i.e. F(A ⊗ B) = F(A) ⊙ F(B) and F(I) = J, and also preserves the coherence isomorphisms.
+     *  (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
      *
-     *      5)Symmetry (for a symmetric monoidal category): There is a natural isomorphism A ⊗ B ≅ B ⊗ A, for any objects A and B.
-     *
-     *      6)Braiding (for a braided monoidal category): There is a natural isomorphism A ⊗ B ≅ B ⊗ A, together with coherence conditions.
-     *
-     *      7)Duals (for a monoidal category with duals): For any object A in the category, there exist objects A^* and εA,
-     *      together with natural isomorphisms A ⊗ A^* ≅ I and εA ⊗ A ≅ I, where I is the unit object,
-     *      such that A^* is the dual of A and εA is the counit of A. The dual and counit satisfy certain coherence conditions
-     *
-     *
-     *
-     * In a monoidal category, the tensor product is a bifunctor, which means that it takes two objects and returns another object.
-     * So, to check if a monoidal category has a bifunctor, we need to check if the tensor product satisfies the following conditions:
-     *
-     *      1) It is a functor in each variable separately, meaning that for any two morphisms f: A → A' and g: B → B' in the category,
-     *      there is a corresponding morphism f ⊗ g: A ⊗ B → A' ⊗ B' in the category.
-     *
-     *      2)It is associative up to natural isomorphism, meaning that there is a natural isomorphism associating
-     *      ((A ⊗ B) ⊗ C) with (A ⊗ (B ⊗ C)) for all objects A, B, and C in the category.
-     *
-     *      3) It has a unit object I, such that there is a natural isomorphism between (A ⊗ I) and A,
-     *      and between (I ⊗ A) and A, for all objects A in the category.
-     *
+     *  id(A) * id(B) = id(A *B)
      *
      */
 
@@ -87,8 +73,16 @@ public class Main {
     public static void main(String[] args) {
         readFile();
         formatIdentities();
+        formatMorphs();
+        createMorphs();
+        Table tensorTable = formatTensor();
+        Table table = createTable();
     }
 
+
+
+
+    //===========================================================================================READ THE CSVS============================================================================================
     /**
      * Reads a CSV file containing the states and morphisms and adds each line to a list of Strings.
      * the file is taken from its path which is stored in the path variable.
@@ -99,6 +93,7 @@ public class Main {
      */
     public static void readFile(){
         String line = "";
+        String line2 = "";
         try{
             BufferedReader br = new BufferedReader( new FileReader(path));
             while((line = br.readLine())!= null){
@@ -107,49 +102,23 @@ public class Main {
         } catch (IOException e){
             e.printStackTrace();
         }
-    }
 
-    /**
-     * Formats the String lines stored by readFile in readLines
-     * the method splits the first line into different states and creates a new state object.
-     * the states are stored in the states list.
-     * for the morphisms, the method splits the string into an array of size 3 and creates a new morphism.
-     * it then stores each morphism in the morphisms list
-     */
-    public static void formatLines(){
-        //split the states and add them to the list
-        String[] stateArr = readLines.get(0).split(",");
-        for (String s : stateArr) {
-            State a = new State(s);
-            states.add(a);
-        }
-        for(int i=1;i<readLines.size();i++){
-            String currLine = readLines.get(i);
-            String[] splittedLine = currLine.split(",");
-            State a = new State(splittedLine[1]);
-            State b = new State(splittedLine[2]);
-            Morphisms m = new Morphisms(a,b,splittedLine[0]);
-            morphisms.add(m);
+        try{
+            BufferedReader br1 = new BufferedReader( new FileReader(tensorPath));
+            while((line2 = br1.readLine())!= null){
+                readTensor.add(line2);
+            }
+        } catch (IOException e){
+            e.printStackTrace();
         }
     }
 
-//TODO ASSUME VALID IDENTITY
+//========================================================================= FORMAT INPUTS ===============================================================================================================
+
 
     /**
-     * Formats the String lines stored by readFile in readLines
-     * the method splits the first line into different states and creates a new state object.
-     * the states are stored in the states list.
-     * for the morphisms, the method splits the string into an array of size 3 and creates a new morphism.
-     * it then stores each morphism in the morphisms list
+     * we assume that if the diagonal has a value then it must be an identity. otherwise it is "-"
      */
-    public static void formatMultTable(){
-        //Get Identities first
-        formatIdentities();
-        //if size of states is 0 here then we can conclude that it is not a valid category.
-
-    }
-
-
     public static void formatIdentities(){
         for(int i=0;i<readLines.size();i++){
             String[] curr = readLines.get(i).split(",");
@@ -164,16 +133,25 @@ public class Main {
                 identityNames.add(curr[i]);
                 morphisms.add(m);
             }
-
         }
-        formatMorphs();
-        System.out.println("done formats");
-        System.out.println(statesA.size());
+    }
+    public static Table createTable(){
+        Morphisms[][] t = new Morphisms[morphisms.size()][morphisms.size()];
+        for(int i=0;i<readLines.size();i++){
+            String[] currLine = readLines.get(i).split(",");
+            for( int j=0;j<currLine.length;j++){
+                t[i][j] = morphismNames.getOrDefault(currLine[j], null);
+
+            }
+        }
+        return new Table(t);
+    }
+
+
+    private static void createMorphs() {
         while (rechecks.size()!=0){
             doRechecks();
         }
-        System.out.println("done rechecks");
-        System.out.println(statesA.size());
         Set<String> stateAKeys = statesA.keySet();
         Set<String> stateBKeys = stateB.keySet();
         if(stateBKeys.size()!= stateAKeys.size()){
@@ -186,13 +164,11 @@ public class Main {
                 exit(0);
             }
             if(!identityNames.contains(key)){
-                Morphisms m = new Morphisms(getState(key),getState(stateB.get(key)),key);
+                Morphisms m = new Morphisms(getState(statesA.get(key)),getState(stateB.get(key)),key);
+                morphismNames.put(m.name,m);
                 morphisms.add(m);
             }
 
-        }
-        for(Morphisms m : morphisms){
-            System.out.println("name: "+ m.name.toString() + " A: "+ m.stateA+" B: "+m.stateB.toString());
         }
     }
 
@@ -211,15 +187,15 @@ public class Main {
                 if(identityNames.contains(row) && col.equals(n)){
                     //start m = row
                     if(statesA.containsKey(n)){
-                        if(!statesA.get(n).equals(getState(col).name)){
+                        if(!statesA.containsKey(row) || !statesA.get(n).equals(statesA.get(row))){
                             System.out.println("This is an invalid category 1");
                             continue;
                         }
                     }
                     else {
-                        if(getState(row)!= null){
+                        if(statesA.containsKey(row)){
                             System.out.println("in identites + col, not null"+ row+" "+col);
-                            statesA.put(n,getState(row).name);
+                            statesA.put(n,statesA.get(row));
                             continue;
                         }
                         else {
@@ -232,16 +208,16 @@ public class Main {
                 } else if (row.equals(n) && identityNames.contains(col)) {
                     //end m = identity
                     if(stateB.containsKey(n)){
-                        if(!stateB.get(n).equals(getState(col).name)){
+                        if(!stateB.containsKey(col) || !stateB.get(n).equals(stateB.get(col))){
                             System.out.println("This is an invalid category 2");
                             exit(0);
                             continue;
                         }
                     }
                     else {
-                        if(getState(col)!= null){
+                        if(stateB.containsKey(col)){
                             System.out.println("in row + identites , not null"+ row+" "+col);
-                            stateB.put(n,getState(col).name);
+                            stateB.put(n,stateB.get(col));
                             continue;
                         }
                         else {
@@ -261,9 +237,9 @@ public class Main {
                     if (statesA.containsKey(row)){
                         // m state A = row state A
                         if(statesA.containsKey(n)){
-                            if(getState(row)!=null){
+                            if(statesA.containsKey(row)){
                                 System.out.println("in row + col ,not null"+ row+" "+col);
-                                if(!statesA.get(n).equals(statesA.get(getState(row).name))){
+                                if(!statesA.get(n).equals(statesA.get(row))){
                                     System.out.println("row: " + row);
                                     System.out.println("col: "+ col);
                                     System.out.println(statesA.get(n));
@@ -281,8 +257,8 @@ public class Main {
 
                         }else {
                             System.out.println("state A not added yet");
-                            if(getState(row)!= null){
-                                statesA.put(n,statesA.get(getState(row).name));
+                            if(statesA.containsKey(row)){
+                                statesA.put(n,statesA.get(row));
                                 continue;
                             }
                             else{
@@ -297,21 +273,18 @@ public class Main {
                         //m end = col end
                         if(stateB.containsKey(n)){
                             System.out.println("state b added");
-                            if(getState(col)!= null){
-                                if(!stateB.get(n).equals(stateB.get(getState(col).name))){
-                                    System.out.println("This is an invalid category 5");
-                                    exit(0);
-                                    continue;
-                                }
-                            }
-                            else{
-                                rechecks.add(new int[]{i,j});
+
+                            if(!stateB.get(n).equals(stateB.get(col))){
+                                System.out.println("This is an invalid category 5");
+                                exit(0);
                                 continue;
                             }
+
+
                         }else{
                             System.out.println("state b not added");
-                            if(getState(col)!= null){
-                                stateB.put(n,stateB.get(getState(col).name));
+                            if(stateB.containsKey(col)){
+                                stateB.put(n,stateB.get(col));
                                 continue;
                             }
                             else{
@@ -419,14 +392,181 @@ public class Main {
         rechecks = rechecksdupl;
     }
     public static  State getState(String name){
+
         for(State s : states){
-            String ss = "f"+s.name;
+            String ss = s.name;
             if(ss.equals(name)){
                 return s;
             }
         }
         return null;
     }
+
+    public static Table formatTensor(){
+        Morphisms[][] tensorTable = new Morphisms[readTensor.size()-1][readTensor.size()-1];
+        String[] colLabels = readTensor.get(0).split(",");
+        for( int i=1;i<colLabels.length;i++){
+            tensorCol.put(colLabels[i],i-1);
+        }
+        for( int i=1;i<readTensor.size();i++){
+            String[] currLine = readTensor.get(i).split(",");
+            tensorRow.put(currLine[0],i-1);
+            for(int j=1;j<currLine.length;j++){
+                tensorTable[i-1][j-1] = new Morphisms(null,null,currLine[j]);
+                Tensor n = new Tensor(new Morphisms(null,null,currLine[0]),new Morphisms(null,null,colLabels[j]),new Morphisms(null,null,currLine[j]));
+                tensorList.add(n);
+            }
+        }
+        return new Table(tensorTable);
+    }
+
+    public static Morphisms getTensor(String row, String col, Table tensorTable){
+        int rowIndex = tensorRow.get(row);
+        int colIndex = tensorCol.get(col);
+        return tensorTable.getMorphism(rowIndex,colIndex);
+    }
+
+
+
+
+
+
+// =================================================================================== CHECK MONOIDAL PROPERTIES =============================================================================================
+
+
+    //(f * g) * h == f * (g * h)
+    // assume the table has no blanks or "-"
+    public static boolean checkAssociativity(Table tensortable){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j<morphisms.size();j++){
+                for( int k=0;k<morphisms.size();k++){
+                    Morphisms a = morphisms.get(i);
+                    Morphisms b = morphisms.get(j);
+                    Morphisms c = morphisms.get(k);
+
+                    //Left side
+                    Morphisms ab = getTensor(a.name,b.name,tensortable);
+                    Morphisms abc = getTensor(ab.name,c.name,tensortable);
+
+                    // Right side
+
+                    Morphisms bc = getTensor(b.name,c.name,tensortable);
+                    Morphisms bca = getTensor(a.name,bc.name,tensortable);
+
+                    if (!abc.name.equals(bca.name)){
+                        return false;
+                    }
+
+
+
+
+
+
+
+
+                }
+            }
+        }
+        return true;
+    }
+
+    public static boolean check2(Table tensorTable, Table t){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j<morphisms.size();j++){
+                if(t.getMorphism(i,j)== null){
+                    continue;
+                }
+
+                for(int k=0;k<morphisms.size();k++){
+                    for(int l=0;l<morphisms.size();l++){
+                        if(t.getMorphism(k,l)== null){
+                            continue;
+                        }
+                        Morphisms kh = t.getMorphism(i,j);
+                        Morphisms gf = t.getMorphism(k,l);
+                        Morphisms left = tensorTable.getMorphism(tensorRow.get(kh.name),tensorCol.get(gf.name));
+
+                        //should be inputting a morphism not a number. just as above
+
+                        Morphisms kg = tensorTable.getMorphism()
+
+
+
+
+
+
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //    /**
+//     * Formats the String lines stored by readFile in readLines
+//     * the method splits the first line into different states and creates a new state object.
+//     * the states are stored in the states list.
+//     * for the morphisms, the method splits the string into an array of size 3 and creates a new morphism.
+//     * it then stores each morphism in the morphisms list
+//     */
+//    public static void formatLines(){
+//        //split the states and add them to the list
+//        String[] stateArr = readLines.get(0).split(",");
+//        for (String s : stateArr) {
+//            State a = new State(s);
+//            states.add(a);
+//        }
+//        for(int i=1;i<readLines.size();i++){
+//            String currLine = readLines.get(i);
+//            String[] splittedLine = currLine.split(",");
+//            State a = new State(splittedLine[1]);
+//            State b = new State(splittedLine[2]);
+//            Morphisms m = new Morphisms(a,b,splittedLine[0]);
+//            morphisms.add(m);
+//        }
+//    }
+//
+//    //TODO ASSUME VALID IDENTITY
+//
+//    /**
+//     * Formats the String lines stored by readFile in readLines
+//     * the method splits the first line into different states and creates a new state object.
+//     * the states are stored in the states list.
+//     * for the morphisms, the method splits the string into an array of size 3 and creates a new morphism.
+//     * it then stores each morphism in the morphisms list
+//     */
+//    public static void formatMultTable(){
+//        //Get Identities first
+//        formatIdentities();
+//        //if size of states is 0 here then we can conclude that it is not a valid category.
+//
+//    }
+
+
+
+
+
 
 
 }
