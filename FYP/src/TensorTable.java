@@ -21,4 +21,14 @@ public class TensorTable {
 //        this.tensorCol = tensorCol;
 //        this.tensorRow = tensorRow;
 //   }
+
+
+
+    public int getRowIndex(String row){
+        return tensorRow.get(row);
+    }
+
+    public int getColIndex(String col){
+        return  tensorCol.get(col);
+    }
 }

@@ -30,6 +30,8 @@ public class Main {
     public  static List<String> readLines = new ArrayList<>();
     public static HashMap<String,Morphisms> morphismNames = new HashMap<>();
     public static List<State> states = new ArrayList<>();
+    public static List<String> tensorRowTitles = new ArrayList<>();
+    public static List<String> tensorColTitles = new ArrayList<>();
     public static  List<String> identityNames = new ArrayList<>();
     public static HashMap<String,String> statesA = new HashMap<>();
     public static HashMap<String,String> stateB = new HashMap<>();
@@ -117,10 +119,6 @@ public class Main {
         }
 
     }
-//TODO check the formatting of the normal category table
-// TODO new format has the titles also.
-// TODO
-// TODO
 
 
 
@@ -156,27 +154,93 @@ public class Main {
     }
 
 //========================================================================= FORMAT INPUTS ===============================================================================================================
+    public static void formatIdentities(){
+        int stateCounter =0;
+        List<String> potentialIden = new ArrayList<>();
+        String[] titlesCol = readLines.get(0).split(",");
+        String[] titlesRow = new String[titlesCol.length];
+        for(int i=0;i<titlesRow.length;i++){
+            String[] cur = readLines.get(i).split(",");
+            titlesRow[i] = cur[0];
+        }
+        for(int i=1;i<readLines.size();i++){
+            String row = titlesRow[i];
+            String[] curr = readLines.get(i).split(",");
+            for(int j=1;j<curr.length;j++){
+                String col = titlesCol[j];
+                if(row.equals(col) && curr[j].equals(row)){
+                    potentialIden.add(curr[j]);
+                }
+            }
+        }
+        boolean comp1 = true;
+        boolean comp2 = true;
+        //assume that a morphism can only be a potential identity once
+        for(int i=0;i<potentialIden.size();i++){
+            String potIden = potentialIden.get(i);
+            innerloop:
+            for(int j=0;j<titlesRow.length;j++){
+                if(!titlesRow[j].equals(potIden)){
+                    continue;
+                }
+                String[] curLine = readLines.get(j).split(",");
 
+               for(int g=1;g<curLine.length;g++){
+                   if(!curLine[g].equals(titlesCol[g]) || !curLine[g].equals("-")){
+                       comp1 = false;
+                       break innerloop;
+                   }
+               }
+            }
+            loop2:
+            if(comp1){
+                for(int k=0;k<titlesCol.length;k++){
+                    if(!titlesCol[k].equals(potIden)){
+                        continue ;
+                    }
+                    for(int l=1;l<readLines.size();l++){
+                        String[] c2 = readLines.get(l).split(",");
+                        if(!c2[k].equals(titlesRow[l]) || !c2[k].equals("-")){
+                            comp2 = false;
+                            break loop2;
+                        }
+                    }
+                }
+            }
+            if(comp1 && comp2){
+                State s = new State(Integer.toString(stateCounter));
+                Morphisms m = new Morphisms(s,s,potIden);
+                s.identity = true;
+                s.identityMorphism = m;
+                states.add(s);
+                statesA.put(potIden,s.name);
+                stateB.put(potIden,s.name);
+                identityNames.add(potIden);
+                morphisms.add(m);
+                stateCounter++;
+            }
+        }
+    }
 
     /**
      * we assume that if the diagonal has a value then it must be an identity. otherwise it is "-"
      */
-    public static void formatIdentities(){
-        for(int i=1;i<readLines.size();i++){
-            String[] curr = readLines.get(i).split(",");
-            if(!curr[i+1].equals("-")){
-                State s = new State(Integer.toString(i));
-                Morphisms m = new Morphisms(s,s,curr[i+1]);
-                s.identity = true;
-                s.identityMorphism = m;
-                states.add(s);
-                statesA.put(curr[i+1],s.name);
-                stateB.put(curr[i+1],s.name);
-                identityNames.add(curr[i+1]);
-                morphisms.add(m);
-            }
-        }
-    }
+//    public static void formatIdentities(){
+//        for(int i=1;i<readLines.size();i++){
+//            String[] curr = readLines.get(i).split(",");
+//            if(!curr[i+1].equals("-")){
+//                State s = new State(Integer.toString(i));
+//                Morphisms m = new Morphisms(s,s,curr[i+1]);
+//                s.identity = true;
+//                s.identityMorphism = m;
+//                states.add(s);
+//                statesA.put(curr[i+1],s.name);
+//                stateB.put(curr[i+1],s.name);
+//                identityNames.add(curr[i+1]);
+//                morphisms.add(m);
+//            }
+//        }
+//    }
     public static Table createTable(){
         String[] labels = readLines.get(0).split(",");
         HashMap<String,Integer> row = new HashMap<>();
@@ -463,10 +527,12 @@ public class Main {
         String[] colLabels = readTensor.get(0).split(",");
         for( int i=1;i<colLabels.length;i++){
             tensorCol.put(colLabels[i],i-1);
+            tensorColTitles.add(colLabels[i]);
         }
         for( int i=1;i<readTensor.size();i++){
             String[] currLine = readTensor.get(i).split(",");
             tensorRow.put(currLine[0],i-1);
+            tensorRowTitles.add(currLine[0]);
             for(int j=1;j<currLine.length;j++){
                 tensorTable[i-1][j-1] = new Morphisms(null,null,currLine[j]);
                 Tensor n = new Tensor(new Morphisms(null,null,currLine[0]),new Morphisms(null,null,colLabels[j]),new Morphisms(null,null,currLine[j]));
@@ -622,8 +688,30 @@ public class Main {
                 Morphisms b = morphismNames.get(identityNames.get(j));
 
                 Morphisms lhs = tensorTable.getMorphism(a.name,b.name);
-                //TODO check if lhs is a valid identity
-                //TODO check if all the properties for the identity morphism holds for lhs
+
+
+                int  rowIndex = tensorTable.getRowIndex(lhs.name);
+                int colIndex =tensorTable.getColIndex(lhs.name);
+
+                Morphisms[] line = tensorTable.t[rowIndex];
+
+
+                //check the row
+                for(int k=0;k<line.length;k++){
+                    if(!line[k].name.equals(tensorColTitles.get(k))){
+                        return false;
+                    }
+
+                }
+
+                //check col
+                for(int k=0;k<tensorTable.t.length;k++){
+                    if(!tensorTable.t[k][colIndex].name.equals(tensorRowTitles.get(k))){
+                        return false;
+                    }
+                }
+                // we dont have to check the exact row and col of the identity because the above checks has done that
+
 
 
             }
