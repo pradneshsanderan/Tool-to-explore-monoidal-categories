@@ -28,12 +28,7 @@ public class Main {
     public  static List<Morphisms> morphisms = new ArrayList<>();
     public static List<Tensor> tensorList = new ArrayList<>();
     public  static List<String> readLines = new ArrayList<>();
-    public static HashMap<String,Integer> tensorRow = new HashMap<>();
     public static HashMap<String,Morphisms> morphismNames = new HashMap<>();
-    public static HashMap<String, Integer> tensorCol = new HashMap<>();
-    public static HashMap<String,Integer> catRow = new HashMap<>();
-    public static HashMap<String, Integer> catCol = new HashMap<>();
-    public static Morphisms[][] catTable = new Morphisms[morphisms.size()][morphisms.size()];
     public static List<State> states = new ArrayList<>();
     public static  List<String> identityNames = new ArrayList<>();
     public static HashMap<String,String> statesA = new HashMap<>();
@@ -84,10 +79,48 @@ public class Main {
         formatIdentities();
         formatMorphs();
         createMorphs();
-        Table tensorTable = formatTensor();
+        TensorTable tensorTable = formatTensor();
         Table table = createTable();
-    }
 
+        //check category properties
+
+
+
+        //check monoidal properties
+        boolean assoc = checkAssociativity(tensorTable);
+        boolean check2 = check2(tensorTable,table);
+        boolean domain = checkDomain(tensorTable,table);
+        boolean codomain = checkCodomain(tensorTable);
+        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
+        boolean pass = assoc && check2 && domain && codomain && idenMonoidal;
+
+        if(pass){
+            System.out.println("It is a valid monoidal category");
+        }
+        else {
+            System.out.println("It is NOT a valid monoidal category");
+            if(!assoc){
+                System.out.println("It failed the associativity test");
+            }
+            if(!check2){
+                System.out.println("It failed the check2 test");
+            }
+            if(!domain){
+                System.out.println("It failed the domain test");
+            }
+            if(!codomain){
+                System.out.println("It failed the codomain test");
+            }
+            if(!idenMonoidal){
+                System.out.println("It failed the identity test");
+            }
+        }
+
+    }
+//TODO check the formatting of the normal category table
+// TODO new format has the titles also.
+// TODO
+// TODO
 
 
 
@@ -129,31 +162,43 @@ public class Main {
      * we assume that if the diagonal has a value then it must be an identity. otherwise it is "-"
      */
     public static void formatIdentities(){
-        for(int i=0;i<readLines.size();i++){
+        for(int i=1;i<readLines.size();i++){
             String[] curr = readLines.get(i).split(",");
-            if(!curr[i].equals("-")){
+            if(!curr[i+1].equals("-")){
                 State s = new State(Integer.toString(i));
-                Morphisms m = new Morphisms(s,s,curr[i]);
+                Morphisms m = new Morphisms(s,s,curr[i+1]);
                 s.identity = true;
                 s.identityMorphism = m;
                 states.add(s);
-                statesA.put(curr[i],s.name);
-                stateB.put(curr[i],s.name);
-                identityNames.add(curr[i]);
+                statesA.put(curr[i+1],s.name);
+                stateB.put(curr[i+1],s.name);
+                identityNames.add(curr[i+1]);
                 morphisms.add(m);
             }
         }
     }
     public static Table createTable(){
+        String[] labels = readLines.get(0).split(",");
+        HashMap<String,Integer> row = new HashMap<>();
+        HashMap<String,Integer> col = new HashMap<>();
+
+
+        for(int i=1;i<labels.length;i++){
+            col.put(labels[i],i-1);
+        }
         Morphisms[][] t = new Morphisms[morphisms.size()][morphisms.size()];
-        for(int i=0;i<readLines.size();i++){
+        for(int i=1;i<readLines.size();i++){
             String[] currLine = readLines.get(i).split(",");
-            for( int j=0;j<currLine.length;j++){
+            row.put(currLine[0],i-1);
+            for( int j=1;j<currLine.length;j++){
                 t[i][j] = morphismNames.getOrDefault(currLine[j], null);
 
             }
         }
-        return new Table(t);
+        Table table = new Table(t);
+        table.row = row;
+        table.col = col;
+        return table;
     }
 
 
@@ -182,12 +227,12 @@ public class Main {
     }
 
     public static void formatMorphs(){
-        for(int i=0;i<readLines.size();i++){
-            String row = "f" + i;
+        for(int i=1;i<readLines.size();i++){
+            String row = "f" + (i-1);
             String[] curr = readLines.get(i).split(",");
-            for(int j =0;j<curr.length;j++){
+            for(int j =1;j<curr.length;j++){
                 String n = curr[j];
-                String col = "f" + j;
+                String col = "f" + (j-1);
 
                 if(row.equals(col) || n.equals("-")){
                     System.out.println("in identites"+ row+" "+col);
@@ -209,7 +254,7 @@ public class Main {
                         }
                         else {
                             System.out.println("in identites + col, null"+ row+" "+col);
-                            rechecks.add(new int[]{i,j});
+                            rechecks.add(new int[]{i+1,j+1});
                             continue;
                         }
 
@@ -231,7 +276,7 @@ public class Main {
                         }
                         else {
                             System.out.println("in row + identites , null"+ row+" "+col);
-                            rechecks.add(new int[]{i,j});
+                            rechecks.add(new int[]{i+1,j+1});
                             continue;
                         }
                     }
@@ -260,7 +305,7 @@ public class Main {
                             }
                             else {
                                 System.out.println("in row + col ,null"+ row+" "+col);
-                                rechecks.add(new int[]{i,j});
+                                rechecks.add(new int[]{i+1,j+1});
                                 continue;
                             }
 
@@ -271,7 +316,7 @@ public class Main {
                                 continue;
                             }
                             else{
-                                rechecks.add(new int[]{i,j});
+                                rechecks.add(new int[]{i+1,j+1});
                                 continue;
                             }
 
@@ -297,7 +342,7 @@ public class Main {
                                 continue;
                             }
                             else{
-                                rechecks.add(new int[]{i,j});
+                                rechecks.add(new int[]{i+1,j+1});
                                 continue;
                             }
 
@@ -307,7 +352,7 @@ public class Main {
                     }
                     if(!ASet && !Bset){
                         //need to recheck later
-                        rechecks.add(new int[]{i,j});
+                        rechecks.add(new int[]{i+1,j+1});
                     }
 
                 }
@@ -411,8 +456,10 @@ public class Main {
         return null;
     }
 
-    public static Table formatTensor(){
+    public static TensorTable formatTensor(){
         Morphisms[][] tensorTable = new Morphisms[readTensor.size()-1][readTensor.size()-1];
+        HashMap<String,Integer> tensorRow = new HashMap<>();
+        HashMap<String, Integer> tensorCol = new HashMap<>();
         String[] colLabels = readTensor.get(0).split(",");
         for( int i=1;i<colLabels.length;i++){
             tensorCol.put(colLabels[i],i-1);
@@ -426,13 +473,14 @@ public class Main {
                 tensorList.add(n);
             }
         }
-        return new Table(tensorTable);
+        TensorTable t = new TensorTable(tensorTable);
+        t.tensorRow = tensorRow;
+        t.tensorCol = tensorCol;
+        return t;
     }
 
-    public static Morphisms getTensor(String row, String col, Table tensorTable){
-        int rowIndex = tensorRow.get(row);
-        int colIndex = tensorCol.get(col);
-        return tensorTable.getMorphism(rowIndex,colIndex);
+    public static Morphisms getTensor(String row, String col, TensorTable tensorTable){
+        return tensorTable.getMorphism(row,col);
     }
 
 
@@ -445,7 +493,7 @@ public class Main {
 
     //(f * g) * h == f * (g * h)
     // assume the table has no blanks or "-"
-    public static boolean checkAssociativity(Table tensortable){
+    public static boolean checkAssociativity(TensorTable tensortable){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
                 for( int k=0;k<morphisms.size();k++){
@@ -481,40 +529,107 @@ public class Main {
 
 
 //    (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
-    public static boolean check2(Table tensorTable, Table t){
+    public static boolean check2(TensorTable tensorTable, Table t){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
-                if(t.getMorphism(i,j)== null){
+                Morphisms km = morphisms.get(i);
+                Morphisms hm = morphisms.get(j);
+                if(t.getMorphism(km.name,hm.name) == null){
                     continue;
                 }
 
                 for(int k=0;k<morphisms.size();k++){
                     for(int l=0;l<morphisms.size();l++){
-                        if(t.getMorphism(k,l)== null){
+
+                        Morphisms gm = morphisms.get(k);
+                        Morphisms fm = morphisms.get(l);
+                        if(t.getMorphism(gm.name,fm.name)== null){
                             continue;
                         }
-                        Morphisms kh = t.getMorphism(i,j);
-                        Morphisms gf = t.getMorphism(k,l);
-                        Morphisms left = tensorTable.getMorphism(tensorRow.get(kh.name),tensorCol.get(gf.name));
-
-                        //should be inputting a morphism not a number. just as above
-
-                        Morphisms kg = tensorTable.getMorphism()
+                        Morphisms kh = t.getMorphism(km.name,hm.name);
+                        Morphisms gf = t.getMorphism(gm.name,fm.name);
+                        Morphisms left = tensorTable.getMorphism(kh.name, gf.name);
 
 
+                        Morphisms kg = tensorTable.getMorphism(km.name,gm.name);
+                        Morphisms hf = tensorTable.getMorphism(hm.name,fm.name);
+
+                        Morphisms right = t.getMorphism(kg.name,hf.name);
 
 
-
+                        if(!left.name.equals(right.name)){
+                            return false;
+                        }
 
                     }
                 }
             }
         }
+        return true;
     }
 
 
+//    dom(f * g) == dom(f) * dom(g)
+//    instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
+//     *  dom(f) * dom(g) is object multiplication. use id(dom f) * id(dom g) instead
+    public static boolean checkDomain(TensorTable tensorTable, Table table){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j<morphisms.size();j++){
+                Morphisms f = morphisms.get(i);
+                Morphisms g = morphisms.get(j);
+                //recheck if we return the dom of the right side or not
+                State lefttSide = tensorTable.getMorphism(f.name,g.name).stateA;
+                State rightSide = tensorTable.getMorphism(f.stateA.getIdentityMorphism().name,g.stateA.getIdentityMorphism().name).stateA;
+
+                if(!lefttSide.name.equals(rightSide.name)){
+                    return false;
+                }
+            }
+        }
 
 
+
+
+        return true;
+    }
+
+
+    public static boolean checkCodomain(TensorTable tensorTable){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j<morphisms.size();j++){
+                Morphisms f = morphisms.get(i);
+                Morphisms g = morphisms.get(j);
+                //recheck if we return the dom of the right side or not
+                State lefttSide = tensorTable.getMorphism(f.name,g.name).stateB;
+                State rightSide = tensorTable.getMorphism(f.stateB.getIdentityMorphism().name,g.stateB.getIdentityMorphism().name).stateB;
+
+                if(!lefttSide.name.equals(rightSide.name)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+    //id(A) * id(B) = id(A *B)
+
+    public static boolean checkIndetitesMonoidal(TensorTable tensorTable){
+        for(int i=0;i<identityNames.size();i++){
+            for( int j=0;j<identityNames.size();j++){
+
+                Morphisms a = morphismNames.get(identityNames.get(i));
+                Morphisms b = morphismNames.get(identityNames.get(j));
+
+                Morphisms lhs = tensorTable.getMorphism(a.name,b.name);
+                //TODO check if lhs is a valid identity
+                //TODO check if all the properties for the identity morphism holds for lhs
+
+
+            }
+        }
+        return true;
+    }
 
 
 
