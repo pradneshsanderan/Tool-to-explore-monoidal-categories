@@ -39,35 +39,6 @@ public class Main {
 /**
  * TODO change the program to take a multiplication table instead.
  */
-
-
-    /**
-     * TODO: THE MONOIDAL PART
-     * A monoidal category is a category equipped with a tensor product and a unit object, subject to the following properties:
-     *  PROPERTIES TO CHECK:::
-     *
-     *  dom(f * g) == dom(f) * dom(g)
-     *  instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
-     *  dom(f) * dom(g) is object multiplication. use id(dom f) * id(dom g) instead
-     *
-     *  codomain(f * g) == codomain(f) * codomain(g)
-     *
-     *  (f * g) * h == f * (g * h)
-     *
-     *  (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
-     *  if k.h does not exist then just skip
-     *
-     *
-     *  id(A) * id(B) = id(A *B)
-     *  take 2 ids, get tensor value. then check if the tensor value is a valid id
-     *
-     *
-     *
-     *  the last one. go through every id. there must exist one id where the property holds for multiple fs
-     *
-     */
-
-
     /**
      * the main method of the class. it first reads the file stated in the path, calls the method to format the lines.
      * it then first checks if the category has any identities. then if there is a valid solution.
@@ -555,6 +526,34 @@ public class Main {
 
 // =================================================================================== CHECK MONOIDAL PROPERTIES =============================================================================================
 
+
+
+
+    /**
+     * TODO: THE MONOIDAL PART
+     * A monoidal category is a category equipped with a tensor product and a unit object, subject to the following properties:
+     *  PROPERTIES TO CHECK:::
+     *
+     *  dom(f * g) == dom(f) * dom(g)
+     *  instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
+     *  dom(f) * dom(g) is object multiplication. use id(dom f) * id(dom g) instead
+     *
+     *  codomain(f * g) == codomain(f) * codomain(g)
+     *
+     *  (f * g) * h == f * (g * h)
+     *
+     *  (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
+     *  if k.h does not exist then just skip
+     *
+     *
+     *  id(A) * id(B) = id(A *B)
+     *  take 2 ids, get tensor value. then check if the tensor value is a valid id
+     *
+     *
+     *
+     *  the last one. go through every id. there must exist one id where the property holds for multiple fs
+     *
+     */
 
     //(f * g) * h == f * (g * h)
     // assume the table has no blanks or "-"
