@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -761,7 +760,6 @@ public class Main {
 //        }
 //    }
 //
-//    //TODO ASSUME VALID IDENTITY
 //
 //    /**
 //     * Formats the String lines stored by readFile in readLines
