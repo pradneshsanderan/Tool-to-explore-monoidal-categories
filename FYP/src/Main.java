@@ -21,8 +21,8 @@ import static java.lang.System.exit;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\cat1.csv";
-    public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\tensor1.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat1.csv";
+    public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testtens1.csv";
     public  static List<String> readTensor = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
     public static List<Tensor> tensorList = new ArrayList<>();
@@ -52,13 +52,14 @@ public class Main {
         formatMorphs();
         createMorphs();
         TensorTable tensorTable = formatTensor();
+        System.out.println("\n"+"\n");
         Table table = createTable();
 
         //check category properties
 
-
-
-        //check monoidal properties
+//
+//
+//        //check monoidal properties
         boolean assoc = checkAssociativity(tensorTable);
         boolean check2 = check2(tensorTable,table);
         boolean domain = checkDomain(tensorTable,table);
@@ -156,7 +157,7 @@ public class Main {
                 String[] curLine = readLines.get(j).split(",");
 
                for(int g=1;g<curLine.length;g++){
-                   if(!curLine[g].equals(titlesCol[g]) || !curLine[g].equals("-")){
+                   if(!curLine[g].equals(titlesCol[g]) && !curLine[g].equals("-")){
                        comp1 = false;
                        break innerloop;
                    }
@@ -170,7 +171,7 @@ public class Main {
                     }
                     for(int l=1;l<readLines.size();l++){
                         String[] c2 = readLines.get(l).split(",");
-                        if(!c2[k].equals(titlesRow[l]) || !c2[k].equals("-")){
+                        if(!c2[k].equals(titlesRow[l]) && !c2[k].equals("-")){
                             comp2 = false;
                             break loop2;
                         }
@@ -187,6 +188,7 @@ public class Main {
                 stateB.put(potIden,s.name);
                 identityNames.add(potIden);
                 morphisms.add(m);
+                morphismNames.put(m.name,m);
                 stateCounter++;
             }
         }
@@ -223,9 +225,10 @@ public class Main {
         Morphisms[][] t = new Morphisms[morphisms.size()][morphisms.size()];
         for(int i=1;i<readLines.size();i++){
             String[] currLine = readLines.get(i).split(",");
+
             row.put(currLine[0],i-1);
             for( int j=1;j<currLine.length;j++){
-                t[i][j] = morphismNames.getOrDefault(currLine[j], null);
+                t[i-1][j-1] = morphismNames.getOrDefault(currLine[j], null);
 
             }
         }
@@ -262,11 +265,11 @@ public class Main {
 
     public static void formatMorphs(){
         for(int i=1;i<readLines.size();i++){
-            String row = "f" + (i-1);
+            String row = String.valueOf((i-1));
             String[] curr = readLines.get(i).split(",");
             for(int j =1;j<curr.length;j++){
                 String n = curr[j];
-                String col = "f" + (j-1);
+                String col = String.valueOf((j-1));
 
                 if(row.equals(col) || n.equals("-")){
                     System.out.println("in identites"+ row+" "+col);
@@ -404,9 +407,11 @@ public class Main {
             int row_i = curr[0];
             int col_j = curr[1];
             String[] currSplit = readLines.get(row_i).split(",");
+            System.out.println("split");
+            System.out.println(Arrays.toString(currSplit));
             String n = currSplit[col_j];
-            String row = "f"+row_i;
-            String col = "f"+col_j;
+            String row = String.valueOf(row_i);
+            String col = String.valueOf(col_j);
 
 
             if(row.equals(col) || n.equals("-")){
@@ -619,6 +624,9 @@ public class Main {
                         Morphisms hf = tensorTable.getMorphism(hm.name,fm.name);
 
                         Morphisms right = t.getMorphism(kg.name,hf.name);
+                        if(right == null){
+                            continue;
+                        }
 
 
                         if(!left.name.equals(right.name)){
@@ -642,8 +650,9 @@ public class Main {
                 Morphisms f = morphisms.get(i);
                 Morphisms g = morphisms.get(j);
                 //recheck if we return the dom of the right side or not
-                State lefttSide = tensorTable.getMorphism(f.name,g.name).stateA;
-                State rightSide = tensorTable.getMorphism(f.stateA.getIdentityMorphism().name,g.stateA.getIdentityMorphism().name).stateA;
+                Morphisms lefttSide1 = tensorTable.getMorphism(f.name,g.name);
+                State lefttSide = getState(statesA.get(tensorTable.getMorphism(f.name,g.name).name));
+                State rightSide = (getState(statesA.get(tensorTable.getMorphism(f.stateA.getIdentityMorphism().name,g.stateA.getIdentityMorphism().name).name)));
 
                 if(!lefttSide.name.equals(rightSide.name)){
                     return false;
@@ -664,8 +673,8 @@ public class Main {
                 Morphisms f = morphisms.get(i);
                 Morphisms g = morphisms.get(j);
                 //recheck if we return the dom of the right side or not
-                State lefttSide = tensorTable.getMorphism(f.name,g.name).stateB;
-                State rightSide = tensorTable.getMorphism(f.stateB.getIdentityMorphism().name,g.stateB.getIdentityMorphism().name).stateB;
+                State lefttSide = getState(stateB.get(tensorTable.getMorphism(f.name,g.name).name));
+                State rightSide = getState(stateB.get(tensorTable.getMorphism(f.stateB.getIdentityMorphism().name,g.stateB.getIdentityMorphism().name).name));
 
                 if(!lefttSide.name.equals(rightSide.name)){
                     return false;
@@ -681,9 +690,11 @@ public class Main {
     public static boolean checkIndetitesMonoidal(TensorTable tensorTable){
         for(int i=0;i<identityNames.size();i++){
             for( int j=0;j<identityNames.size();j++){
+                System.out.println(identityNames.get(j));
 
                 Morphisms a = morphismNames.get(identityNames.get(i));
                 Morphisms b = morphismNames.get(identityNames.get(j));
+
 
                 Morphisms lhs = tensorTable.getMorphism(a.name,b.name);
 
