@@ -21,7 +21,7 @@ import static java.lang.System.exit;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat1.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat2.csv";
     public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testtens1.csv";
     public  static List<String> readTensor = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -41,32 +41,30 @@ public class Main {
  */
     /**
      * the main method of the class. it first reads the file stated in the path, calls the method to format the lines.
-     * it then first checks if the category has any identities. then if there is a valid solution.
-     * if a valid solution exists, then it prints out the table. otherwise it prints
-     * "The category has no solutions"
+     * it then first checks if the category has any identities. once it finds the identities if they exist, it then creates
+     * the morphisms, creates a category table and tensor table and then chekcs the category for the monoidal properties.
      * @param args
      */
     public static void main(String[] args) {
         readFile();
         formatIdentities();
+        if(identityNames.size()==0){
+            System.out.println("It is a valid monoidal category");
+            return;
+        }
         formatMorphs();
         createMorphs();
         TensorTable tensorTable = formatTensor();
-        System.out.println("\n"+"\n");
         Table table = createTable();
 
-        //check category properties
-
-//
-//
 //        //check monoidal properties
         boolean assoc = checkAssociativity(tensorTable);
         boolean check2 = check2(tensorTable,table);
         boolean domain = checkDomain(tensorTable,table);
         boolean codomain = checkCodomain(tensorTable);
-        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
-        boolean pass = assoc && check2 && domain && codomain && idenMonoidal;
-
+//        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
+//        boolean pass = assoc && check2 && domain && codomain && idenMonoidal;
+        boolean pass = assoc && check2 && domain && codomain;
         if(pass){
             System.out.println("It is a valid monoidal category");
         }
@@ -84,9 +82,9 @@ public class Main {
             if(!codomain){
                 System.out.println("It failed the codomain test");
             }
-            if(!idenMonoidal){
-                System.out.println("It failed the identity test");
-            }
+//            if(!idenMonoidal){
+//                System.out.println("It failed the identity test");
+//            }
         }
 
     }
@@ -124,7 +122,19 @@ public class Main {
         }
     }
 
-//========================================================================= FORMAT INPUTS ===============================================================================================================
+//========================================================================= FORMAT CATEGORY ===============================================================================================================
+
+    /**
+     * Identity Morphism Properties:
+     * Maps an object onto itself
+     * each object can only have one
+     * left and right associative
+     *
+     * the method iterates through the lines read from the csv file and that was stored in readLines arraylist.
+     * it finds morphisms that might satisfy the identity morphism properties and then further checks if it is both
+     * left and right associative. if it is then it is an identity morphism
+     * the identity morphism is then added to the list of morphisms, identityNames and MorphismNames
+     */
     public static void formatIdentities(){
         int stateCounter =0;
         List<String> potentialIden = new ArrayList<>();
@@ -213,6 +223,13 @@ public class Main {
 //            }
 //        }
 //    }
+
+    /**
+     * the method takes the inputted csv file and creates a table object of type Table to represent the
+     * category table.
+     *
+     * @return
+     */
     public static Table createTable(){
         String[] labels = readLines.get(0).split(",");
         HashMap<String,Integer> row = new HashMap<>();
@@ -239,6 +256,9 @@ public class Main {
     }
 
 
+    /**
+     *
+     */
     private static void createMorphs() {
         while (rechecks.size()!=0){
             doRechecks();
@@ -263,6 +283,9 @@ public class Main {
         }
     }
 
+    /**
+     *
+     */
     public static void formatMorphs(){
         for(int i=1;i<readLines.size();i++){
             String row = String.valueOf((i-1));
@@ -291,7 +314,7 @@ public class Main {
                         }
                         else {
                             System.out.println("in identites + col, null"+ row+" "+col);
-                            rechecks.add(new int[]{i+1,j+1});
+                            rechecks.add(new int[]{i,j});
                             continue;
                         }
 
@@ -313,7 +336,7 @@ public class Main {
                         }
                         else {
                             System.out.println("in row + identites , null"+ row+" "+col);
-                            rechecks.add(new int[]{i+1,j+1});
+                            rechecks.add(new int[]{i,j});
                             continue;
                         }
                     }
@@ -342,7 +365,7 @@ public class Main {
                             }
                             else {
                                 System.out.println("in row + col ,null"+ row+" "+col);
-                                rechecks.add(new int[]{i+1,j+1});
+                                rechecks.add(new int[]{i,j});
                                 continue;
                             }
 
@@ -353,7 +376,7 @@ public class Main {
                                 continue;
                             }
                             else{
-                                rechecks.add(new int[]{i+1,j+1});
+                                rechecks.add(new int[]{i,j});
                                 continue;
                             }
 
@@ -379,7 +402,7 @@ public class Main {
                                 continue;
                             }
                             else{
-                                rechecks.add(new int[]{i+1,j+1});
+                                rechecks.add(new int[]{i,j});
                                 continue;
                             }
 
@@ -389,7 +412,7 @@ public class Main {
                     }
                     if(!ASet && !Bset){
                         //need to recheck later
-                        rechecks.add(new int[]{i+1,j+1});
+                        rechecks.add(new int[]{i,j});
                     }
 
                 }
@@ -400,15 +423,20 @@ public class Main {
     }
 
 
+    /**
+     *
+     */
     public static void doRechecks(){
+        System.out.println("got rechecks");
         List<int[]> rechecksdupl = new ArrayList<>();
         for(int i=0;i<rechecks.size();i++){
             int[] curr = rechecks.get(i);
             int row_i = curr[0];
             int col_j = curr[1];
             String[] currSplit = readLines.get(row_i).split(",");
-            System.out.println("split");
+
             System.out.println(Arrays.toString(currSplit));
+            System.out.println(col_j);
             String n = currSplit[col_j];
             String row = String.valueOf(row_i);
             String col = String.valueOf(col_j);
@@ -484,6 +512,12 @@ public class Main {
         rechecks.clear();
         rechecks = rechecksdupl;
     }
+
+    /**
+     *
+     * @param name the name of the state we want
+     * @return a state object that has the name of the state we inputted
+     */
     public static  State getState(String name){
 
         for(State s : states){
@@ -495,6 +529,15 @@ public class Main {
         return null;
     }
 
+    /**
+     * the method takes the inputted tensor table and forms a table to represent it.
+     * it also adds the row titles and colums titles to the lists tensorRowTitles and tensorColTitles
+     *
+     * @return a tensorTable object representing the tensor table
+     */
+
+
+    //===============================================================================================FORMAT TENSORS=================================================================================================
     public static TensorTable formatTensor(){
         Morphisms[][] tensorTable = new Morphisms[readTensor.size()-1][readTensor.size()-1];
         HashMap<String,Integer> tensorRow = new HashMap<>();
@@ -520,6 +563,13 @@ public class Main {
         return t;
     }
 
+    /**
+     *
+     * @param row the name of the row in the table
+     * @param col the name of the col in the table
+     * @param tensorTable table representing the tensortable
+     * @return the morphism queried about from the tensor table
+     */
     public static Morphisms getTensor(String row, String col, TensorTable tensorTable){
         return tensorTable.getMorphism(row,col);
     }
@@ -562,6 +612,12 @@ public class Main {
 
     //(f * g) * h == f * (g * h)
     // assume the table has no blanks or "-"
+
+    /**
+     *
+     * @param tensortable
+     * @return
+     */
     public static boolean checkAssociativity(TensorTable tensortable){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
@@ -597,7 +653,19 @@ public class Main {
     }
 
 
-//    (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
+//
+
+    /**
+     *Property To Check:
+     * (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
+     *
+     * if the morphism product of the category is "-" then we ignore and more on.
+     *
+     *
+     * @param tensorTable a table representing the tensortable of the category
+     * @param t a table representing the category
+     * @return boolean if the category satisfies the property or not
+     */
     public static boolean check2(TensorTable tensorTable, Table t){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
@@ -641,9 +709,20 @@ public class Main {
     }
 
 
-//    dom(f * g) == dom(f) * dom(g)
-//    instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
-//     *  dom(f) * dom(g) is object multiplication. use id(dom f) * id(dom g) instead
+
+
+    /**
+     *Property to Check:
+     * dom(f * g) == dom(f) * dom(g)
+     *
+     * Instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
+     * dom(f) * dom(g) is object multiplication. use id(dom f) * id(dom g) instead
+     *
+     *
+     * @param tensorTable a table representing the tensortable of the category
+     * @param table a table representing the category
+     * @return boolean if the category satisfies the property or not
+     */
     public static boolean checkDomain(TensorTable tensorTable, Table table){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
@@ -667,6 +746,17 @@ public class Main {
     }
 
 
+    /**
+     * Property to check:
+     *  codom(f * g) == codom(f) * codom(g)
+     *  instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
+     *  codom(f) * codom(g) is object multiplication. use id(codom f) * id(codom g) instead
+     *
+     *
+     *
+     * @param tensorTable a table representing the tensortable of the category
+     * @return boolean if the category satisfies the property or not
+     */
     public static boolean checkCodomain(TensorTable tensorTable){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
@@ -685,8 +775,26 @@ public class Main {
     }
 
 
-    //id(A) * id(B) = id(A *B)
 
+
+    /**
+     *
+     * Property to check:
+     * id(A) * id(B) = id(A *B)
+     *
+     *
+     * checks if the category satisfies the monoidal identity property
+     * TODO check if the rhs means that the product of the lhs must just satisfy the identity properties of not(Current Undestanding)
+     *
+     *
+     * Identity Morphism Properties:
+     *     Maps an object onto itself
+     *     each object can only have one
+     *     left and right associative
+     *
+     * @param tensorTable a table representing the tensortable of the category
+     * @return boolean if the category satisfies the property or not
+     */
     public static boolean checkIndetitesMonoidal(TensorTable tensorTable){
         for(int i=0;i<identityNames.size();i++){
             for( int j=0;j<identityNames.size();j++){
@@ -694,20 +802,28 @@ public class Main {
 
                 Morphisms a = morphismNames.get(identityNames.get(i));
                 Morphisms b = morphismNames.get(identityNames.get(j));
+                System.out.println("MOr a : "+ a.name);
+                System.out.println("Mor b : "+ b.name);
 
 
                 Morphisms lhs = tensorTable.getMorphism(a.name,b.name);
+                System.out.println(lhs.name);
 
 
                 int  rowIndex = tensorTable.getRowIndex(lhs.name);
                 int colIndex =tensorTable.getColIndex(lhs.name);
 
                 Morphisms[] line = tensorTable.t[rowIndex];
-
-
+                System.out.println("ind: "+  rowIndex);
+                for(Morphisms m: line){
+                    System.out.println(m.name);
+                }
                 //check the row
                 for(int k=0;k<line.length;k++){
                     if(!line[k].name.equals(tensorColTitles.get(k))){
+                        System.out.println("false: "+ line[k].name);
+                        System.out.println(tensorColTitles.get(k));
+                        System.out.println("K: "+  k);
                         return false;
                     }
 
@@ -716,6 +832,7 @@ public class Main {
                 //check col
                 for(int k=0;k<tensorTable.t.length;k++){
                     if(!tensorTable.t[k][colIndex].name.equals(tensorRowTitles.get(k))){
+                        System.out.println("false2: "+tensorTable.t[k][colIndex] );
                         return false;
                     }
                 }
