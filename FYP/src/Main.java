@@ -55,6 +55,10 @@ public class Main {
         formatMorphs();
         createMorphs();
         TensorTable tensorTable = formatTensor();
+        if(!validTensor(tensorTable)){
+            System.out.println("the tensor table is invalid");
+            return;
+        }
         Table table = createTable();
 
 //        //check monoidal properties
@@ -62,9 +66,9 @@ public class Main {
         boolean check2 = check2(tensorTable,table);
         boolean domain = checkDomain(tensorTable,table);
         boolean codomain = checkCodomain(tensorTable);
-//        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
-//        boolean pass = assoc && check2 && domain && codomain && idenMonoidal;
-        boolean pass = assoc && check2 && domain && codomain;
+        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
+        boolean uniqueIden = checkUniqueIden(tensorTable);
+        boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
         if(pass){
             System.out.println("It is a valid monoidal category");
         }
@@ -82,9 +86,12 @@ public class Main {
             if(!codomain){
                 System.out.println("It failed the codomain test");
             }
-//            if(!idenMonoidal){
-//                System.out.println("It failed the identity test");
-//            }
+            if(!idenMonoidal){
+                System.out.println("It failed the identity test");
+            }
+            if(!uniqueIden){
+                System.out.println("It failed the unique identity test");
+            }
         }
 
     }
@@ -573,6 +580,19 @@ public class Main {
     public static Morphisms getTensor(String row, String col, TensorTable tensorTable){
         return tensorTable.getMorphism(row,col);
     }
+    public static boolean validTensor(TensorTable tensorTable){
+        for(int i=0;i<tensorTable.t.length;i++){
+            for (int j=0;j<tensorTable.t[i].length;j++){
+
+                if(tensorTable.t[i][j].name.equals("-")){
+                    return false;
+                }
+
+
+            }
+        }
+        return true;
+    }
 
 
 
@@ -807,42 +827,44 @@ public class Main {
 
 
                 Morphisms lhs = tensorTable.getMorphism(a.name,b.name);
-                System.out.println(lhs.name);
-
-
-                int  rowIndex = tensorTable.getRowIndex(lhs.name);
-                int colIndex =tensorTable.getColIndex(lhs.name);
-
-                Morphisms[] line = tensorTable.t[rowIndex];
-                System.out.println("ind: "+  rowIndex);
-                for(Morphisms m: line){
-                    System.out.println(m.name);
+                if(!identityNames.contains(lhs.name)){
+                    return false;
                 }
-                //check the row
-                for(int k=0;k<line.length;k++){
-                    if(!line[k].name.equals(tensorColTitles.get(k))){
-                        System.out.println("false: "+ line[k].name);
-                        System.out.println(tensorColTitles.get(k));
-                        System.out.println("K: "+  k);
-                        return false;
-                    }
-
-                }
-
-                //check col
-                for(int k=0;k<tensorTable.t.length;k++){
-                    if(!tensorTable.t[k][colIndex].name.equals(tensorRowTitles.get(k))){
-                        System.out.println("false2: "+tensorTable.t[k][colIndex] );
-                        return false;
-                    }
-                }
-                // we dont have to check the exact row and col of the identity because the above checks has done that
 
 
 
             }
         }
         return true;
+    }
+
+    //there exists ID(a) where f * ID(a)  = f  = ID(a) * f for every morphism f
+
+    public static boolean checkUniqueIden(TensorTable tensorTable){
+        for(int i=0;i<identityNames.size();i++){
+            String currIden = identityNames.get(i);
+            boolean valid = true;
+            for(int j=0;j<morphisms.size();j++){
+
+                String currMorphism = morphisms.get(j).name;
+                if(!tensorTable.getMorphism(currIden,currMorphism).name.equals(currMorphism)){
+                    valid = false;
+                }
+                if(!tensorTable.getMorphism(currMorphism,currIden).name.equals(currMorphism)){
+                    valid = false;
+                }
+
+
+
+            }
+            if(valid){
+                return true;
+            }
+
+
+
+        }
+        return false;
     }
 
 
