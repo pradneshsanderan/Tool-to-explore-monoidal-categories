@@ -21,7 +21,7 @@ import static java.lang.System.exit;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat2.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat1.csv";
     public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testtens1.csv";
     public  static List<String> readTensor = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -54,13 +54,14 @@ public class Main {
         }
         formatMorphs();
         createMorphs();
-        TensorTable tensorTable = formatTensor();
+        Table tensorTable = formatTensor();
         if(!validTensor(tensorTable)){
             System.out.println("the tensor table is invalid");
             return;
         }
         Table table = createTable();
-
+        System.out.println("Printin tables");
+        tensorTable.printTable(tensorColTitles,tensorRowTitles);
 //        //check monoidal properties
         boolean assoc = checkAssociativity(tensorTable);
         boolean check2 = check2(tensorTable,table);
@@ -545,7 +546,7 @@ public class Main {
 
 
     //===============================================================================================FORMAT TENSORS=================================================================================================
-    public static TensorTable formatTensor(){
+    public static Table formatTensor(){
         Morphisms[][] tensorTable = new Morphisms[readTensor.size()-1][readTensor.size()-1];
         HashMap<String,Integer> tensorRow = new HashMap<>();
         HashMap<String, Integer> tensorCol = new HashMap<>();
@@ -564,9 +565,9 @@ public class Main {
                 tensorList.add(n);
             }
         }
-        TensorTable t = new TensorTable(tensorTable);
-        t.tensorRow = tensorRow;
-        t.tensorCol = tensorCol;
+        Table t = new Table(tensorTable);
+        t.row = tensorRow;
+        t.col = tensorCol;
         return t;
     }
 
@@ -577,14 +578,14 @@ public class Main {
      * @param tensorTable table representing the tensortable
      * @return the morphism queried about from the tensor table
      */
-    public static Morphisms getTensor(String row, String col, TensorTable tensorTable){
+    public static Morphisms getTensor(String row, String col, Table tensorTable){
         return tensorTable.getMorphism(row,col);
     }
-    public static boolean validTensor(TensorTable tensorTable){
-        for(int i=0;i<tensorTable.t.length;i++){
-            for (int j=0;j<tensorTable.t[i].length;j++){
+    public static boolean validTensor(Table tensorTable){
+        for(int i=0;i<tensorTable.table.length;i++){
+            for (int j=0;j<tensorTable.table[i].length;j++){
 
-                if(tensorTable.t[i][j].name.equals("-")){
+                if(tensorTable.table[i][j].name.equals("-")){
                     return false;
                 }
 
@@ -638,7 +639,7 @@ public class Main {
      * @param tensortable
      * @return
      */
-    public static boolean checkAssociativity(TensorTable tensortable){
+    public static boolean checkAssociativity(Table tensortable){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
                 for( int k=0;k<morphisms.size();k++){
@@ -686,7 +687,7 @@ public class Main {
      * @param t a table representing the category
      * @return boolean if the category satisfies the property or not
      */
-    public static boolean check2(TensorTable tensorTable, Table t){
+    public static boolean check2(Table tensorTable, Table t){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
                 Morphisms km = morphisms.get(i);
@@ -743,7 +744,7 @@ public class Main {
      * @param table a table representing the category
      * @return boolean if the category satisfies the property or not
      */
-    public static boolean checkDomain(TensorTable tensorTable, Table table){
+    public static boolean checkDomain(Table tensorTable, Table table){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
                 Morphisms f = morphisms.get(i);
@@ -777,7 +778,7 @@ public class Main {
      * @param tensorTable a table representing the tensortable of the category
      * @return boolean if the category satisfies the property or not
      */
-    public static boolean checkCodomain(TensorTable tensorTable){
+    public static boolean checkCodomain(Table tensorTable){
         for(int i=0;i<morphisms.size();i++){
             for(int j=0;j<morphisms.size();j++){
                 Morphisms f = morphisms.get(i);
@@ -815,7 +816,7 @@ public class Main {
      * @param tensorTable a table representing the tensortable of the category
      * @return boolean if the category satisfies the property or not
      */
-    public static boolean checkIndetitesMonoidal(TensorTable tensorTable){
+    public static boolean checkIndetitesMonoidal(Table tensorTable){
         for(int i=0;i<identityNames.size();i++){
             for( int j=0;j<identityNames.size();j++){
                 System.out.println(identityNames.get(j));
@@ -840,7 +841,7 @@ public class Main {
 
     //there exists ID(a) where f * ID(a)  = f  = ID(a) * f for every morphism f
 
-    public static boolean checkUniqueIden(TensorTable tensorTable){
+    public static boolean checkUniqueIden(Table tensorTable){
         for(int i=0;i<identityNames.size();i++){
             String currIden = identityNames.get(i);
             boolean valid = true;
