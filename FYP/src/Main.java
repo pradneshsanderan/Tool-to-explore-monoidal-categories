@@ -21,7 +21,7 @@ import static java.lang.System.exit;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat1.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat2.csv";
     public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testtens1.csv";
     public  static List<String> readTensor = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -60,6 +60,12 @@ public class Main {
             return;
         }
         Table table = createTable();
+        boolean catAssoc = checkAssoc(table);
+        boolean catComp = checkComp(table);
+        if(!catComp || !catAssoc){
+            System.out.println("Invalid category");
+            return;
+        }
         System.out.println("Printin tables");
         tensorTable.printTable(tensorColTitles,tensorRowTitles);
 //        //check monoidal properties
@@ -596,6 +602,90 @@ public class Main {
     }
 
 
+//=====================================================================================  CHECK CATEGORY PROPS ===============================================================================================================
+    //(m1 . m2) . m3 = m1 . (m2.m3)
+    public static boolean checkAssoc(Table table){
+
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j< morphisms.size();j++){
+                Morphisms m1 = morphisms.get(i);
+                Morphisms m2 = morphisms.get(j);
+                if( table.getMorphism(m1.name,m2.name) == null){
+                    continue;
+                }
+
+                for(int k=0;k<morphisms.size();k++){
+                    Morphisms m3 = morphisms.get(k);
+                    if(table.getMorphism(m2.name,m3.name)==null){
+                        continue;
+                    }
+
+                    Morphisms l1 = table.getMorphism(m1.name,m2.name);
+                    Morphisms r1 = table.getMorphism(m2.name,m3.name);
+                    if(table.getMorphism(l1.name, m3.name) == null || table.getMorphism(m1.name,r1.name) == null){
+                        continue;
+                    }
+
+                    if(!table.getMorphism(l1.name, m3.name).equals(table.getMorphism(m1.name,r1.name))){
+                        return false;
+                    }
+                }
+            }
+        }
+
+
+
+        return true;
+    }
+
+
+    public static boolean checkComp(Table table){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j =0;j<morphisms.size();j++){
+                if(table.getMorphism(morphisms.get(i).name,morphisms.get(j).name) == null){
+                    continue;
+                }
+
+                String A1 = statesA.get(morphisms.get(i).name);
+                String B1 = stateB.get(morphisms.get(i).name);
+                String A2 = statesA.get(morphisms.get(j).name);
+                String B2 = stateB.get(morphisms.get(j).name);
+
+                if(!A1.equals(A2) && !A2.equals(B2) && !A1.equals(B2) ){
+
+                    boolean found = false;
+                    innerLoop:
+                    for(int k=0;k<morphisms.size();k++){
+                        Morphisms curr = morphisms.get(k);
+                        String aState = statesA.get(curr.name);
+                        String bstate = stateB.get(curr.name);
+
+                        if(aState.equals(A1) && bstate.equals(B2)){
+                            found = true;
+                            break innerLoop;
+                        }
+
+
+
+
+                    }
+                    if(!found){
+                        return false;
+                    }
+
+
+
+
+
+                }
+            }
+        }
+
+
+
+
+        return true;
+    }
 
 
 
