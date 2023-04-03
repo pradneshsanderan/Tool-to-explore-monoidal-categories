@@ -1,7 +1,14 @@
+import java.awt.*;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
+import java.util.List;
+
 
 import static java.lang.System.exit;
 
@@ -46,26 +53,94 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
+        new CategoryValidatorGUI();
+//        readFile();
+//        formatIdentities();
+//        if(identityNames.size()==0){
+//            System.out.println("It is a valid monoidal category");
+//            return;
+//        }
+//        formatMorphs();
+//        createMorphs();
+//        Table tensorTable = formatTensor();
+//        if(!validTensor(tensorTable)){
+//            System.out.println("the tensor table is invalid");
+//            return;
+//        }
+//        Table table = createTable();
+//        boolean catAssoc = checkAssoc(table);
+//        boolean catComp = checkComp(table);
+//        if(!catComp || !catAssoc){
+//            System.out.println("Invalid category");
+//            return;
+//        }
+//        System.out.println("Printin tables");
+//        tensorTable.printTable(tensorColTitles,tensorRowTitles);
+////        //check monoidal properties
+//        boolean assoc = checkAssociativity(tensorTable);
+//        boolean check2 = check2(tensorTable,table);
+//        boolean domain = checkDomain(tensorTable,table);
+//        boolean codomain = checkCodomain(tensorTable);
+//        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
+//        boolean uniqueIden = checkUniqueIden(tensorTable);
+//        boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
+//        if(pass){
+//            System.out.println("It is a valid monoidal category");
+//        }
+//        else {
+//            System.out.println("It is NOT a valid monoidal category");
+//            if(!assoc){
+//                System.out.println("It failed the associativity test");
+//            }
+//            if(!check2){
+//                System.out.println("It failed the check2 test");
+//            }
+//            if(!domain){
+//                System.out.println("It failed the domain test");
+//            }
+//            if(!codomain){
+//                System.out.println("It failed the codomain test");
+//            }
+//            if(!idenMonoidal){
+//                System.out.println("It failed the identity test");
+//            }
+//            if(!uniqueIden){
+//                System.out.println("It failed the unique identity test");
+//            }
+//        }
+
+    }
+    public static int validateCategory(String[][] data){
         readFile();
+        for(int i=0;i<data.length;i++){
+            StringBuilder b = new StringBuilder();
+            for(int j=0;j<data[i].length;j++){
+                b.append(data[i][j]);
+                b.append(",");
+
+            }
+            readLines.add(b.toString());
+
+
+        }
         formatIdentities();
         if(identityNames.size()==0){
-            System.out.println("It is a valid monoidal category");
-            return;
+            System.out.println("It is not a valid monoidal category");
+            return 3;
         }
         formatMorphs();
         createMorphs();
-        System.out.println("domne");
         Table tensorTable = formatTensor();
         if(!validTensor(tensorTable)){
             System.out.println("the tensor table is invalid");
-            return;
+            return 1;
         }
         Table table = createTable();
         boolean catAssoc = checkAssoc(table);
         boolean catComp = checkComp(table);
         if(!catComp || !catAssoc){
             System.out.println("Invalid category");
-            return;
+            return 2 ;
         }
         System.out.println("Printin tables");
         tensorTable.printTable(tensorColTitles,tensorRowTitles);
@@ -79,29 +154,37 @@ public class Main {
         boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
         if(pass){
             System.out.println("It is a valid monoidal category");
+            return 0;
         }
         else {
             System.out.println("It is NOT a valid monoidal category");
             if(!assoc){
                 System.out.println("It failed the associativity test");
+                return 4;
             }
             if(!check2){
                 System.out.println("It failed the check2 test");
+                return 5;
             }
             if(!domain){
                 System.out.println("It failed the domain test");
+                return 6;
             }
             if(!codomain){
                 System.out.println("It failed the codomain test");
+                return 7;
             }
             if(!idenMonoidal){
                 System.out.println("It failed the identity test");
+                return 8;
+
             }
             if(!uniqueIden){
                 System.out.println("It failed the unique identity test");
+                return 9;
             }
         }
-
+        return 3;
     }
 
 
@@ -118,14 +201,14 @@ public class Main {
     public static void readFile(){
         String line = "";
         String line2 = "";
-        try{
-            BufferedReader br = new BufferedReader( new FileReader(path));
-            while((line = br.readLine())!= null){
-                readLines.add(line);
-            }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+//        try{
+//            BufferedReader br = new BufferedReader( new FileReader(path));
+//            while((line = br.readLine())!= null){
+//                readLines.add(line);
+//            }
+//        } catch (IOException e){
+//            e.printStackTrace();
+//        }
 
         try{
             BufferedReader br1 = new BufferedReader( new FileReader(tensorPath));
@@ -554,8 +637,6 @@ public class Main {
 
     //===============================================================================================FORMAT TENSORS=================================================================================================
     public static Table formatTensor(){
-        System.out.println("reading tensor");
-        System.out.println(readTensor);
         Morphisms[][] tensorTable = new Morphisms[readTensor.size()-1][readTensor.size()-1];
         HashMap<String,Integer> tensorRow = new HashMap<>();
         HashMap<String, Integer> tensorCol = new HashMap<>();
@@ -1025,3 +1106,4 @@ public class Main {
 
 
 }
+
