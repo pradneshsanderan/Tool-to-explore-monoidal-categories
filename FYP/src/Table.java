@@ -18,6 +18,10 @@ public class Table {
      * @return table value of the two morphisms
      */
     public Morphisms getMorphism(String mophA, String morphB){
+        System.out.println("rpq");
+        System.out.println(row.keySet());
+        System.out.println("clq");
+        System.out.println(col.keySet());
         int rowIndex = row.get(mophA);
         int colIndex = col.get(morphB);
         return table[rowIndex][colIndex];
@@ -60,6 +64,23 @@ public class Table {
             }
             k++;
         }
+    }
+
+    public Table copier(){
+        Morphisms[][] t = new Morphisms[table.length][table.length];
+        for(int i=0;i<table.length;i++){
+            for(int j=0;j<table[i].length;j++){
+                t[i][j] = table[i][j];
+
+
+            }
+        }
+        Table tt =  new Table(t);
+        tt.col = this.col;
+        tt.row = this.row;
+        return tt;
+
+
     }
 
 

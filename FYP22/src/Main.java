@@ -54,72 +54,29 @@ public class Main {
      */
     public static void main(String[] args) {
         new CategoryValidatorGUI();
-//        readFile();
-//        formatIdentities();
-//        if(identityNames.size()==0){
-//            System.out.println("It is a valid monoidal category");
-//            return;
-//        }
-//        formatMorphs();
-//        createMorphs();
-//        Table tensorTable = formatTensor();
-//        if(!validTensor(tensorTable)){
-//            System.out.println("the tensor table is invalid");
-//            return;
-//        }
-//        Table table = createTable();
-//        boolean catAssoc = checkAssoc(table);
-//        boolean catComp = checkComp(table);
-//        if(!catComp || !catAssoc){
-//            System.out.println("Invalid category");
-//            return;
-//        }
-//        System.out.println("Printin tables");
-//        tensorTable.printTable(tensorColTitles,tensorRowTitles);
-////        //check monoidal properties
-//        boolean assoc = checkAssociativity(tensorTable);
-//        boolean check2 = check2(tensorTable,table);
-//        boolean domain = checkDomain(tensorTable,table);
-//        boolean codomain = checkCodomain(tensorTable);
-//        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
-//        boolean uniqueIden = checkUniqueIden(tensorTable);
-//        boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
-//        if(pass){
-//            System.out.println("It is a valid monoidal category");
-//        }
-//        else {
-//            System.out.println("It is NOT a valid monoidal category");
-//            if(!assoc){
-//                System.out.println("It failed the associativity test");
-//            }
-//            if(!check2){
-//                System.out.println("It failed the check2 test");
-//            }
-//            if(!domain){
-//                System.out.println("It failed the domain test");
-//            }
-//            if(!codomain){
-//                System.out.println("It failed the codomain test");
-//            }
-//            if(!idenMonoidal){
-//                System.out.println("It failed the identity test");
-//            }
-//            if(!uniqueIden){
-//                System.out.println("It failed the unique identity test");
-//            }
-//        }
-
     }
-    public static int validateCategory(String[][] data){
-        readFile();
-        for(int i=0;i<data.length;i++){
+    public static int validateCategory(String[][] data1, String[][] data2){
+        for(int i=0;i<data1.length;i++){
             StringBuilder b = new StringBuilder();
-            for(int j=0;j<data[i].length;j++){
-                b.append(data[i][j]);
+            for(int j=0;j<data1[i].length;j++){
+                b.append(data1[i][j]);
                 b.append(",");
 
             }
             readLines.add(b.toString());
+            System.out.println(b);
+
+
+        }
+        for(int i=0;i<data2.length;i++){
+            StringBuilder b = new StringBuilder();
+            for(int j=0;j<data2[i].length;j++){
+                b.append(data2[i][j]);
+                b.append(",");
+
+            }
+            readTensor.add(b.toString());
+            System.out.println(b);
 
 
         }
@@ -184,6 +141,7 @@ public class Main {
                 return 9;
             }
         }
+        System.out.println("fucked up");
         return 3;
     }
 
@@ -198,9 +156,9 @@ public class Main {
      *      * Eg:
      *      * A1,A2,A3, \n f1,A1,A2,\n  f2,A2,A2,\n f3, A2,A3
      */
-    public static void readFile(){
-        String line = "";
-        String line2 = "";
+//    public static void readFile(){
+//        String line = "";
+//        String line2 = "";
 //        try{
 //            BufferedReader br = new BufferedReader( new FileReader(path));
 //            while((line = br.readLine())!= null){
@@ -209,16 +167,16 @@ public class Main {
 //        } catch (IOException e){
 //            e.printStackTrace();
 //        }
-
-        try{
-            BufferedReader br1 = new BufferedReader( new FileReader(tensorPath));
-            while((line2 = br1.readLine())!= null){
-                readTensor.add(line2);
-            }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-    }
+//
+//        try{
+//            BufferedReader br1 = new BufferedReader( new FileReader(tensorPath));
+//            while((line2 = br1.readLine())!= null){
+//                readTensor.add(line2);
+//            }
+//        } catch (IOException e){
+//            e.printStackTrace();
+//        }
+//    }
 
 //========================================================================= FORMAT CATEGORY ===============================================================================================================
 

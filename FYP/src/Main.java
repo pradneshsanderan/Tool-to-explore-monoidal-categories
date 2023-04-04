@@ -21,7 +21,7 @@ import static java.lang.System.exit;
  */
 public class Main {
 
-    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testcat2.csv";
+    public static String path = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\partfilled.csv";
     public static String tensorPath = "C:\\Users\\pradn\\Desktop\\School\\Year_4\\FYP\\testtens1.csv";
     public  static List<String> readTensor = new ArrayList<>();
     public  static List<Morphisms> morphisms = new ArrayList<>();
@@ -47,60 +47,80 @@ public class Main {
      */
     public static void main(String[] args) {
         readFile();
-        formatIdentities();
-        if(identityNames.size()==0){
-            System.out.println("It is a valid monoidal category");
-            return;
-        }
-        formatMorphs();
-        createMorphs();
-        System.out.println("domne");
-        Table tensorTable = formatTensor();
-        if(!validTensor(tensorTable)){
-            System.out.println("the tensor table is invalid");
-            return;
-        }
-        Table table = createTable();
-        boolean catAssoc = checkAssoc(table);
-        boolean catComp = checkComp(table);
-        if(!catComp || !catAssoc){
-            System.out.println("Invalid category");
-            return;
-        }
-        System.out.println("Printin tables");
-        tensorTable.printTable(tensorColTitles,tensorRowTitles);
-//        //check monoidal properties
-        boolean assoc = checkAssociativity(tensorTable);
-        boolean check2 = check2(tensorTable,table);
-        boolean domain = checkDomain(tensorTable,table);
-        boolean codomain = checkCodomain(tensorTable);
-        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
-        boolean uniqueIden = checkUniqueIden(tensorTable);
-        boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
-        if(pass){
-            System.out.println("It is a valid monoidal category");
-        }
-        else {
-            System.out.println("It is NOT a valid monoidal category");
-            if(!assoc){
-                System.out.println("It failed the associativity test");
+//        if(readLines.get(0).split(",")[0].equals("*")){
+            formatIdentities();
+            formatMorphs();
+            createMorphs();
+            Table tensorTable = formatTensor();
+            if(!validTensor(tensorTable)){
+                System.out.println("the tensor table is invalid");
+                return;
             }
-            if(!check2){
-                System.out.println("It failed the check2 test");
+            Table table = createTable();
+            boolean filled = solvetable(table,tensorTable);
+            if(filled){
+                System.out.println("it works!!!");
+
             }
-            if(!domain){
-                System.out.println("It failed the domain test");
+            else {
+                System.out.println("WE FUCKED UPPPPPPPPP !!!!!!!!!!!!!!!!!!!!!!!!!");
             }
-            if(!codomain){
-                System.out.println("It failed the codomain test");
-            }
-            if(!idenMonoidal){
-                System.out.println("It failed the identity test");
-            }
-            if(!uniqueIden){
-                System.out.println("It failed the unique identity test");
-            }
-        }
+
+//        }
+//        formatIdentities();
+//        if(identityNames.size()==0){
+//            System.out.println("It is not  a valid monoidal category");
+//            return;
+//        }
+//        formatMorphs();
+//        createMorphs();
+//        System.out.println("domne");
+//        Table tensorTable = formatTensor();
+//        if(!validTensor(tensorTable)){
+//            System.out.println("the tensor table is invalid");
+//            return;
+//        }
+//        Table table = createTable();
+//        boolean catAssoc = checkAssoc(table);
+//        boolean catComp = checkComp(table);
+//        if(!catComp || !catAssoc){
+//            System.out.println("Invalid category");
+//            return;
+//        }
+//        System.out.println("Printin tables");
+//        tensorTable.printTable(tensorColTitles,tensorRowTitles);
+////        //check monoidal properties
+//        boolean assoc = checkAssociativity(tensorTable);
+//        boolean check2 = check2(tensorTable,table);
+//        boolean domain = checkDomain(tensorTable,table);
+//        boolean codomain = checkCodomain(tensorTable);
+//        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
+//        boolean uniqueIden = checkUniqueIden(tensorTable);
+//        boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
+//        if(pass){
+//            System.out.println("It is a valid monoidal category");
+//        }
+//        else {
+//            System.out.println("It is NOT a valid monoidal category");
+//            if(!assoc){
+//                System.out.println("It failed the associativity test");
+//            }
+//            if(!check2){
+//                System.out.println("It failed the check2 test");
+//            }
+//            if(!domain){
+//                System.out.println("It failed the domain test");
+//            }
+//            if(!codomain){
+//                System.out.println("It failed the codomain test");
+//            }
+//            if(!idenMonoidal){
+//                System.out.println("It failed the identity test");
+//            }
+//            if(!uniqueIden){
+//                System.out.println("It failed the unique identity test");
+//            }
+//        }
 
     }
 
@@ -182,7 +202,7 @@ public class Main {
                 String[] curLine = readLines.get(j).split(",");
 
                for(int g=1;g<curLine.length;g++){
-                   if(!curLine[g].equals(titlesCol[g]) && !curLine[g].equals("-")){
+                   if(!curLine[g].equals(titlesCol[g]) && !curLine[g].equals("-") && !curLine[g].equals("*")){
                        comp1 = false;
                        break innerloop;
                    }
@@ -196,7 +216,7 @@ public class Main {
                     }
                     for(int l=1;l<readLines.size();l++){
                         String[] c2 = readLines.get(l).split(",");
-                        if(!c2[k].equals(titlesRow[l]) && !c2[k].equals("-")){
+                        if(!c2[k].equals(titlesRow[l]) && !c2[k].equals("-") && !c2[k].equals("*")){
                             comp2 = false;
                             break loop2;
                         }
@@ -260,7 +280,15 @@ public class Main {
 
             row.put(currLine[0],i-1);
             for( int j=1;j<currLine.length;j++){
-                t[i-1][j-1] = morphismNames.getOrDefault(currLine[j], null);
+                if(currLine[j].equals("*")){
+                    Morphisms n= new Morphisms(null,null,"*");
+                    t[i-1][j-1] = n;
+                } else if (currLine[j].equals("-")) {
+                    t[i-1][j-1] = null;
+                } else {
+                    t[i-1][j-1] = morphismNames.get(currLine[j]);
+                }
+
 
             }
         }
@@ -282,12 +310,12 @@ public class Main {
         Set<String> stateBKeys = stateB.keySet();
         if(stateBKeys.size()!= stateAKeys.size()){
             System.out.println("state a keys do not match state b keys");
-            exit(0);
+//            exit(0);
         }
         for(String key : stateAKeys){
             if(!stateB.containsKey(key)){
                 System.out.println("state a keys do not match state b keys 2");
-                exit(0);
+//                exit(0);
             }
             if(!identityNames.contains(key)){
                 Morphisms m = new Morphisms(getState(statesA.get(key)),getState(stateB.get(key)),key);
@@ -963,10 +991,221 @@ public class Main {
 
 
 
+//================================================================================================ Table filler =====================================================================================================================
+    public static boolean validEntry(Table table, Table tensorTable){
+        boolean check1 = checkAssocHalf(table);
+        boolean check2 = checkCompHalf(table);
+        boolean check3 = check22(tensorTable,table);
+        boolean check4 = checkUniqueIden(tensorTable);
+        boolean check5 = checkIndetitesMonoidal(tensorTable);
+        boolean check6 = checkCodomain(tensorTable);
+        boolean check7 = checkDomain(tensorTable,table);
+        boolean check8 = checkAssociativity(tensorTable);
+        return check1 && check2 && check3 && check4 && check5 && check6 && check7 && check8;
+    }
+
+
+
+    public static void checker(Table t){
+        for(int i=0;i<t.table.length;i++){
+            for(int j=0;j<t.table[i].length;j++){
+
+
+                if(t.table[i][j] ==null){
+                    System.out.println("I: "+i);
+                    System.out.println("J: "+ j);
+                }
+            }
+        }
+    }
+    public static boolean solvetable(Table table, Table tensorTable){
+        System.out.println("j");
+        checker(table);
+        Set<String> morphNames = morphismNames.keySet();
+        List<String> possentries = new ArrayList<>(morphNames);
+        possentries.add("-");
+        for(int i=0;i<table.table.length;i++){
+            for(int j=0;j<table.table[i].length;j++){
+                if(table.table[i][j]!= null && table.table[i][j].name.equals("*")){
+                    for(int k=0;k<possentries.size();k++){
+                        Table t = table.copier();
+                        String curr = possentries.get(k);
+                        if(curr.equals("-")){
+                            t.table[i][j] = null;
+                        }
+                        else {
+                            Morphisms n = new Morphisms(getState(statesA.get(curr)),getState(stateB.get(curr)),curr);
+                            t.table[i][j] = n;
+                        }
+                        if(validEntry(t,tensorTable)){
+                            if(curr.equals("-")){
+                                table.table[i][j] = null;
+                            }
+                            else {
+                                Morphisms n = new Morphisms(getState(statesA.get(curr)),getState(stateB.get(curr)),curr);
+                                table.table[i][j] = n;
+                            }
+
+                            if(solvetable(table,tensorTable)){
+                                System.out.println(table.table[1][1]);
+                                System.out.println("next");
+                                System.out.println(table.table[2][2]);
+                                return true;
+                            }else {
+                                Morphisms nn= new Morphisms(null,null,"*");
+                                table.table[i][j] = nn;
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+            }
+        }
+
+
+        return true;
+    }
 
 
 
 
+    public static boolean checkAssocHalf(Table table){
+
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j< morphisms.size();j++){
+                Morphisms m1 = morphisms.get(i);
+                Morphisms m2 = morphisms.get(j);
+                if( table.getMorphism(m1.name,m2.name) == null  || table.getMorphism(m1.name,m2.name).name.equals("*")){
+                    continue;
+                }
+
+                for(int k=0;k<morphisms.size();k++){
+                    Morphisms m3 = morphisms.get(k);
+                    if(table.getMorphism(m2.name,m3.name)==null || table.getMorphism(m2.name,m3.name).name.equals("*")){
+                        continue;
+                    }
+
+                    Morphisms l1 = table.getMorphism(m1.name,m2.name);
+                    Morphisms r1 = table.getMorphism(m2.name,m3.name);
+                    if(table.getMorphism(l1.name, m3.name) == null || table.getMorphism(m1.name,r1.name) == null ||
+                            table.getMorphism(l1.name, m3.name).name.equals("*") || table.getMorphism(m1.name,r1.name).name.equals("*")){
+                        continue;
+                    }
+
+                    if(!table.getMorphism(l1.name, m3.name).equals(table.getMorphism(m1.name,r1.name))){
+                        return false;
+                    }
+                }
+            }
+        }
+
+
+
+        return true;
+    }
+
+
+    public static boolean checkCompHalf(Table table){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j =0;j<morphisms.size();j++){
+                if(table.getMorphism(morphisms.get(i).name,morphisms.get(j).name) == null ||table.getMorphism(morphisms.get(i).name,morphisms.get(j).name).name.equals("*") ){
+                    continue;
+                }
+
+                String A1 = statesA.get(morphisms.get(i).name);
+                String B1 = stateB.get(morphisms.get(i).name);
+                String A2 = statesA.get(morphisms.get(j).name);
+                String B2 = stateB.get(morphisms.get(j).name);
+
+                if(!A1.equals(A2) && !A2.equals(B2) && !A1.equals(B2) ){
+
+                    boolean found = false;
+                    innerLoop:
+                    for(int k=0;k<morphisms.size();k++){
+                        Morphisms curr = morphisms.get(k);
+                        String aState = statesA.get(curr.name);
+                        String bstate = stateB.get(curr.name);
+
+                        if(aState.equals(A1) && bstate.equals(B2)){
+                            found = true;
+                            break innerLoop;
+                        }
+
+
+
+
+                    }
+                    if(!found){
+                        return false;
+                    }
+
+
+
+
+
+                }
+            }
+        }
+
+
+
+
+        return true;
+    }
+
+    /**
+     *Property To Check:
+     * (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
+     *
+     * if the morphism product of the category is "-" then we ignore and more on.
+     *
+     *
+     * @param tensorTable a table representing the tensortable of the category
+     * @param t a table representing the category
+     * @return boolean if the category satisfies the property or not
+     */
+    public static boolean check22(Table tensorTable, Table t){
+        for(int i=0;i<morphisms.size();i++){
+            for(int j=0;j<morphisms.size();j++){
+                Morphisms km = morphisms.get(i);
+                Morphisms hm = morphisms.get(j);
+                if(t.getMorphism(km.name,hm.name) == null || t.getMorphism(km.name,hm.name).name.equals("*")){
+                    continue;
+                }
+
+                for(int k=0;k<morphisms.size();k++){
+                    for(int l=0;l<morphisms.size();l++){
+
+                        Morphisms gm = morphisms.get(k);
+                        Morphisms fm = morphisms.get(l);
+                        if(t.getMorphism(gm.name,fm.name)== null || t.getMorphism(gm.name,fm.name).name.equals("*")){
+                            continue;
+                        }
+                        Morphisms kh = t.getMorphism(km.name,hm.name);
+                        Morphisms gf = t.getMorphism(gm.name,fm.name);
+                        Morphisms left = tensorTable.getMorphism(kh.name, gf.name);
+
+
+                        Morphisms kg = tensorTable.getMorphism(km.name,gm.name);
+                        Morphisms hf = tensorTable.getMorphism(hm.name,fm.name);
+
+                        Morphisms right = t.getMorphism(kg.name,hf.name);
+                        if(right == null || right.name.equals("*")){
+                            continue;
+                        }
+
+
+                        if(!left.name.equals(right.name)){
+                            return false;
+                        }
+
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
 
 
