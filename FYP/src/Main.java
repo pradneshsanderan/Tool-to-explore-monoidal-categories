@@ -45,6 +45,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
+        long start = System.nanoTime();
         readFile();
 //        if(readLines.get(0).split(",")[0].equals("*")){
 //            formatIdentities();
@@ -120,7 +121,8 @@ public class Main {
                 System.out.println("It failed the unique identity test");
             }
         }
-
+        long end = System.nanoTime();
+        System.out.println("Time taken = "+ (end-start));
     }
 
 

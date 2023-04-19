@@ -10,6 +10,7 @@ public class CategoryValidatorGUI extends JFrame implements ActionListener {
 
     private JPanel mainPanel;
     private JLabel sizeLabel;
+    private JLabel sizeLabel2;
     private JTextField sizeField;
     private JButton submitButton;
     private JTable table1, table2;
@@ -56,12 +57,14 @@ public class CategoryValidatorGUI extends JFrame implements ActionListener {
 
             scrollPane1 = new JScrollPane(table1);
             scrollPane2 = new JScrollPane(table2);
+            sizeLabel2 = new JLabel("Enter the Category table at the top and tensor product table at the bottom");
 
             mainPanel.remove(sizeLabel);
             mainPanel.remove(sizeField);
             mainPanel.remove(submitButton);
             mainPanel.add(scrollPane1);
             mainPanel.add(scrollPane2);
+            mainPanel.add(sizeLabel2);
 
             JButton validateButton = new JButton("Validate");
             validateButton.addActionListener(new ActionListener() {
@@ -91,7 +94,7 @@ public class CategoryValidatorGUI extends JFrame implements ActionListener {
                     }else if (isValid ==4){
                         resultLabel.setText( "It failed the associativity test");
                     }else if (isValid ==5) {
-                        resultLabel.setText( "It failed the check2 test");
+                        resultLabel.setText( "It failed the bifunctoriality test");
                     }else if (isValid ==6) {
                         resultLabel.setText( "It failed the domain test");
                     }else if (isValid ==7) {
@@ -105,7 +108,7 @@ public class CategoryValidatorGUI extends JFrame implements ActionListener {
             });
 
             resultLabel = new JLabel(" ");
-
+            mainPanel.remove(sizeLabel2);
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             buttonPanel.add(validateButton);
             buttonPanel.add(resultLabel);

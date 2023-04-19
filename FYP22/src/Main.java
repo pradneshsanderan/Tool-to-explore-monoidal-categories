@@ -1,12 +1,4 @@
-import java.awt.*;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
 import java.util.List;
 
 
@@ -64,7 +56,7 @@ public class Main {
 
             }
             readLines.add(b.toString());
-            System.out.println(b);
+//            System.out.println(b);
 
 
         }
@@ -76,13 +68,14 @@ public class Main {
 
             }
             readTensor.add(b.toString());
-            System.out.println(b);
+//            System.out.println(b);
 
 
         }
         formatIdentities();
         if(identityNames.size()==0){
             System.out.println("It is not a valid monoidal category");
+            System.out.println("There are no identity morphisms found");
             return 3;
         }
         formatMorphs();
@@ -93,21 +86,20 @@ public class Main {
             return 1;
         }
         Table table = createTable();
-        boolean catAssoc = checkAssoc(table);
-        boolean catComp = checkComp(table);
+        boolean catAssoc = Validator.checkAssoc(table);
+        boolean catComp = Validator.checkComp(table);
         if(!catComp || !catAssoc){
             System.out.println("Invalid category");
             return 2 ;
         }
-        System.out.println("Printin tables");
         tensorTable.printTable(tensorColTitles,tensorRowTitles);
 //        //check monoidal properties
-        boolean assoc = checkAssociativity(tensorTable);
-        boolean check2 = check2(tensorTable,table);
-        boolean domain = checkDomain(tensorTable,table);
-        boolean codomain = checkCodomain(tensorTable);
-        boolean idenMonoidal = checkIndetitesMonoidal(tensorTable);
-        boolean uniqueIden = checkUniqueIden(tensorTable);
+        boolean assoc = Validator.checkAssociativity(tensorTable);
+        boolean check2 = Validator.bifunctoriality(tensorTable,table);
+        boolean domain = Validator.checkDomain(tensorTable,table);
+        boolean codomain = Validator.checkCodomain(tensorTable);
+        boolean idenMonoidal = Validator.checkIndetitesMonoidal(tensorTable);
+        boolean uniqueIden = Validator.checkUniqueIden(tensorTable);
         boolean pass = assoc && check2 && domain && codomain && idenMonoidal && uniqueIden;
         if(pass){
             System.out.println("It is a valid monoidal category");
@@ -120,7 +112,7 @@ public class Main {
                 return 4;
             }
             if(!check2){
-                System.out.println("It failed the check2 test");
+                System.out.println("It failed the bifunctoriality test");
                 return 5;
             }
             if(!domain){
@@ -141,7 +133,7 @@ public class Main {
                 return 9;
             }
         }
-        System.out.println("fucked up");
+        System.out.println("It is not a valid monoidal category");
         return 3;
     }
 
@@ -351,25 +343,26 @@ public class Main {
                 String col = String.valueOf((j-1));
 
                 if(row.equals(col) || n.equals("-")){
-                    System.out.println("in identites"+ row+" "+col);
                     continue;
                 }
                 if(identityNames.contains(row) && col.equals(n)){
                     //start m = row
                     if(statesA.containsKey(n)){
                         if(!statesA.containsKey(row) || !statesA.get(n).equals(statesA.get(row))){
-                            System.out.println("This is an invalid category 1");
+                            System.out.println("This is an invalid category");
+                            System.out.println("===== COMPONENTS THAT CAUSED AN ERROR ====");
+                            System.out.println(row);
+                            System.out.println(statesA.get(n));
+                            System.out.println(statesA.get(row));
                             continue;
                         }
                     }
                     else {
                         if(statesA.containsKey(row)){
-                            System.out.println("in identites + col, not null"+ row+" "+col);
                             statesA.put(n,statesA.get(row));
                             continue;
                         }
                         else {
-                            System.out.println("in identites + col, null"+ row+" "+col);
                             rechecks.add(new int[]{i,j});
                             continue;
                         }
@@ -379,26 +372,31 @@ public class Main {
                     //end m = identity
                     if(stateB.containsKey(n)){
                         if(!stateB.containsKey(col) || !stateB.get(n).equals(stateB.get(col))){
-                            System.out.println("This is an invalid category 2");
+                            System.out.println("This is an invalid category ");
+                            System.out.println("===== COMPONENTS THAT CAUSED AN ERROR ====");
+                            System.out.println(col);
+                            System.out.println(stateB.get(n));
+                            System.out.println(stateB.get(col));
                             exit(0);
                             continue;
                         }
                     }
                     else {
                         if(stateB.containsKey(col)){
-                            System.out.println("in row + identites , not null"+ row+" "+col);
                             stateB.put(n,stateB.get(col));
                             continue;
                         }
                         else {
-                            System.out.println("in row + identites , null"+ row+" "+col);
                             rechecks.add(new int[]{i,j});
                             continue;
                         }
                     }
                 }
                 else if (identityNames.contains(col) && identityNames.contains(row)){
-                    System.out.println("This is an invalid category3");
+                    System.out.println("This is an invalid category");
+                    System.out.println("===== COMPONENTS THAT CAUSED AN ERROR ====");
+                    System.out.println(col);
+                    System.out.println(row);
                     exit(0);
                 }
                 else {
@@ -408,25 +406,22 @@ public class Main {
                         // m state A = row state A
                         if(statesA.containsKey(n)){
                             if(statesA.containsKey(row)){
-                                System.out.println("in row + col ,not null"+ row+" "+col);
                                 if(!statesA.get(n).equals(statesA.get(row))){
-                                    System.out.println("row: " + row);
-                                    System.out.println("col: "+ col);
+                                    System.out.println("This is an invalid category");
+                                    System.out.println("===== COMPONENTS THAT CAUSED AN ERROR ====");
                                     System.out.println(statesA.get(n));
                                     System.out.println(statesA.get(row));
-                                    System.out.println("This is an invalid category 4");
                                     exit(0);
 
                                 }
                             }
                             else {
-                                System.out.println("in row + col ,null"+ row+" "+col);
+
                                 rechecks.add(new int[]{i,j});
                                 continue;
                             }
 
                         }else {
-                            System.out.println("state A not added yet");
                             if(statesA.containsKey(row)){
                                 statesA.put(n,statesA.get(row));
                                 continue;
@@ -442,17 +437,18 @@ public class Main {
                     if(stateB.containsKey(col)){
                         //m end = col end
                         if(stateB.containsKey(n)){
-                            System.out.println("state b added");
 
                             if(!stateB.get(n).equals(stateB.get(col))){
-                                System.out.println("This is an invalid category 5");
+                                System.out.println("This is an invalid category ");
+                                System.out.println("===== COMPONENTS THAT CAUSED AN ERROR ====");
+                                System.out.println(stateB.get(n));
+                                System.out.println(stateB.get(col));
                                 exit(0);
                                 continue;
                             }
 
 
                         }else{
-                            System.out.println("state b not added");
                             if(stateB.containsKey(col)){
                                 stateB.put(n,stateB.get(col));
                                 continue;
@@ -483,7 +479,6 @@ public class Main {
      *
      */
     public static void doRechecks(){
-        System.out.println("got rechecks");
         List<int[]> rechecksdupl = new ArrayList<>();
         for(int i=0;i<rechecks.size();i++){
             int[] curr = rechecks.get(i);
@@ -491,8 +486,6 @@ public class Main {
             int col_j = curr[1];
             String[] currSplit = readLines.get(row_i).split(",");
 
-            System.out.println(Arrays.toString(currSplit));
-            System.out.println(col_j);
             String n = currSplit[col_j];
             String row = String.valueOf(row_i);
             String col = String.valueOf(col_j);
@@ -505,7 +498,10 @@ public class Main {
                 //start m = row
                 if(statesA.containsKey(n)){
                     if(!statesA.get(n).equals(col)){
-                        System.out.println("This is an invalid category 6");
+                        System.out.println("This is an invalid category ");
+                        System.out.println("===== COMPONENTS THAT CAUSED AN ERROR ====");
+                        System.out.println(statesA.get(n));
+                        System.out.println(col);
                         exit(0);
                     }
                 }
@@ -516,7 +512,10 @@ public class Main {
                 //end m = identity
                 if(stateB.containsKey(n)){
                     if(!stateB.get(n).equals(col)){
-                        System.out.println("This is an invalid category 7");
+                        System.out.println("This is an invalid category ");
+                        System.out.println("===== MORPHISMS THAT CAUSED AN ERROR ====");
+                        System.out.println(col);
+                        System.out.println(stateB.get(n));
                         exit(0);
                     }
                 }
@@ -525,7 +524,10 @@ public class Main {
                 }
             }
             else if (identityNames.contains(col) && identityNames.contains(row)){
-                System.out.println("This is an invalid category 8");
+                System.out.println("This is an invalid category ");
+                System.out.println("===== MORPHISMS THAT CAUSED AN ERROR ====");
+                System.out.println(identityNames.contains(col));
+                System.out.println(identityNames.contains(row));
                 exit(0);
             }
             else {
@@ -536,7 +538,10 @@ public class Main {
                     if(statesA.containsKey(n)){
                         if(!statesA.get(n).equals(statesA.get(row))){
                             System.out.println(morphisms.size());
-                            System.out.println("This is an invalid category 9");
+                            System.out.println("This is an invalid category ");
+                            System.out.println("===== MORPHISMS THAT CAUSED AN ERROR ====");
+                            System.out.println(statesA.get(n));
+                            System.out.println(statesA.get(row));
                             exit(0);
                         }
                     }else {
@@ -548,7 +553,10 @@ public class Main {
                     //m end = col end
                     if(stateB.containsKey(n)){
                         if(!stateB.get(n).equals(stateB.get(col))){
-                            System.out.println("This is an invalid category 10");
+                            System.out.println("This is an invalid category ");
+                            System.out.println("===== MORPHISMS THAT CAUSED AN ERROR ====");
+                            System.out.println(stateB.get(n));
+                            System.out.println(stateB.get(col));
                             exit(0);
                         }
                     }else{
@@ -644,94 +652,6 @@ public class Main {
     }
 
 
-//=====================================================================================  CHECK CATEGORY PROPS ===============================================================================================================
-    //(m1 . m2) . m3 = m1 . (m2.m3)
-    public static boolean checkAssoc(Table table){
-
-        for(int i=0;i<morphisms.size();i++){
-            for(int j=0;j< morphisms.size();j++){
-                Morphisms m1 = morphisms.get(i);
-                Morphisms m2 = morphisms.get(j);
-                if( table.getMorphism(m1.name,m2.name) == null){
-                    continue;
-                }
-
-                for(int k=0;k<morphisms.size();k++){
-                    Morphisms m3 = morphisms.get(k);
-                    if(table.getMorphism(m2.name,m3.name)==null){
-                        continue;
-                    }
-
-                    Morphisms l1 = table.getMorphism(m1.name,m2.name);
-                    Morphisms r1 = table.getMorphism(m2.name,m3.name);
-                    if(table.getMorphism(l1.name, m3.name) == null || table.getMorphism(m1.name,r1.name) == null){
-                        continue;
-                    }
-
-                    if(!table.getMorphism(l1.name, m3.name).equals(table.getMorphism(m1.name,r1.name))){
-                        return false;
-                    }
-                }
-            }
-        }
-
-
-
-        return true;
-    }
-
-
-    public static boolean checkComp(Table table){
-        for(int i=0;i<morphisms.size();i++){
-            for(int j =0;j<morphisms.size();j++){
-                if(table.getMorphism(morphisms.get(i).name,morphisms.get(j).name) == null){
-                    continue;
-                }
-
-                String A1 = statesA.get(morphisms.get(i).name);
-                String B1 = stateB.get(morphisms.get(i).name);
-                String A2 = statesA.get(morphisms.get(j).name);
-                String B2 = stateB.get(morphisms.get(j).name);
-
-                if(!A1.equals(A2) && !A2.equals(B2) && !A1.equals(B2) ){
-
-                    boolean found = false;
-                    innerLoop:
-                    for(int k=0;k<morphisms.size();k++){
-                        Morphisms curr = morphisms.get(k);
-                        String aState = statesA.get(curr.name);
-                        String bstate = stateB.get(curr.name);
-
-                        if(aState.equals(A1) && bstate.equals(B2)){
-                            found = true;
-                            break innerLoop;
-                        }
-
-
-
-
-                    }
-                    if(!found){
-                        return false;
-                    }
-
-
-
-
-
-                }
-            }
-        }
-
-
-
-
-        return true;
-    }
-
-
-
-
 // =================================================================================== CHECK MONOIDAL PROPERTIES =============================================================================================
 
 
@@ -766,256 +686,11 @@ public class Main {
     //(f * g) * h == f * (g * h)
     // assume the table has no blanks or "-"
 
-    /**
-     *
-     * @param tensortable
-     * @return
-     */
-    public static boolean checkAssociativity(Table tensortable){
-        for(int i=0;i<morphisms.size();i++){
-            for(int j=0;j<morphisms.size();j++){
-                for( int k=0;k<morphisms.size();k++){
-                    Morphisms a = morphisms.get(i);
-                    Morphisms b = morphisms.get(j);
-                    Morphisms c = morphisms.get(k);
-
-                    //Left side
-                    Morphisms ab = getTensor(a.name,b.name,tensortable);
-                    Morphisms abc = getTensor(ab.name,c.name,tensortable);
-
-                    // Right side
-
-                    Morphisms bc = getTensor(b.name,c.name,tensortable);
-                    Morphisms bca = getTensor(a.name,bc.name,tensortable);
-
-                    if (!abc.name.equals(bca.name)){
-                        return false;
-                    }
-
-
-
-
-
-
-
-
-                }
-            }
-        }
-        return true;
-    }
-
 
 //
 
-    /**
-     *Property To Check:
-     * (k . h) * (g . f) == (k * g) . (h * f) -> if cod(h) = dom(k) then cod(f) = dom(g)
-     *
-     * if the morphism product of the category is "-" then we ignore and more on.
-     *
-     *
-     * @param tensorTable a table representing the tensortable of the category
-     * @param t a table representing the category
-     * @return boolean if the category satisfies the property or not
-     */
-    public static boolean check2(Table tensorTable, Table t){
-        for(int i=0;i<morphisms.size();i++){
-            for(int j=0;j<morphisms.size();j++){
-                Morphisms km = morphisms.get(i);
-                Morphisms hm = morphisms.get(j);
-                if(t.getMorphism(km.name,hm.name) == null){
-                    continue;
-                }
-
-                for(int k=0;k<morphisms.size();k++){
-                    for(int l=0;l<morphisms.size();l++){
-
-                        Morphisms gm = morphisms.get(k);
-                        Morphisms fm = morphisms.get(l);
-                        if(t.getMorphism(gm.name,fm.name)== null){
-                            continue;
-                        }
-                        Morphisms kh = t.getMorphism(km.name,hm.name);
-                        Morphisms gf = t.getMorphism(gm.name,fm.name);
-                        Morphisms left = tensorTable.getMorphism(kh.name, gf.name);
-
-
-                        Morphisms kg = tensorTable.getMorphism(km.name,gm.name);
-                        Morphisms hf = tensorTable.getMorphism(hm.name,fm.name);
-
-                        Morphisms right = t.getMorphism(kg.name,hf.name);
-                        if(right == null){
-                            continue;
-                        }
-
-
-                        if(!left.name.equals(right.name)){
-                            return false;
-                        }
-
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-
-
-
-    /**
-     *Property to Check:
-     * dom(f * g) == dom(f) * dom(g)
-     *
-     * Instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
-     * dom(f) * dom(g) is object multiplication. use id(dom f) * id(dom g) instead
-     *
-     *
-     * @param tensorTable a table representing the tensortable of the category
-     * @param table a table representing the category
-     * @return boolean if the category satisfies the property or not
-     */
-    public static boolean checkDomain(Table tensorTable, Table table){
-        for(int i=0;i<morphisms.size();i++){
-            for(int j=0;j<morphisms.size();j++){
-                Morphisms f = morphisms.get(i);
-                Morphisms g = morphisms.get(j);
-                //recheck if we return the dom of the right side or not
-                Morphisms lefttSide1 = tensorTable.getMorphism(f.name,g.name);
-                State lefttSide = getState(statesA.get(tensorTable.getMorphism(f.name,g.name).name));
-                State rightSide = (getState(statesA.get(tensorTable.getMorphism(f.stateA.getIdentityMorphism().name,g.stateA.getIdentityMorphism().name).name)));
-
-                if(!lefttSide.name.equals(rightSide.name)){
-                    return false;
-                }
-            }
-        }
-
-
-
-
-        return true;
-    }
-
-
-    /**
-     * Property to check:
-     *  codom(f * g) == codom(f) * codom(g)
-     *  instead of using the objects, we can use the identity of the objects so that its morphism multiplication instead of object multiplication
-     *  codom(f) * codom(g) is object multiplication. use id(codom f) * id(codom g) instead
-     *
-     *
-     *
-     * @param tensorTable a table representing the tensortable of the category
-     * @return boolean if the category satisfies the property or not
-     */
-    public static boolean checkCodomain(Table tensorTable){
-        for(int i=0;i<morphisms.size();i++){
-            for(int j=0;j<morphisms.size();j++){
-                Morphisms f = morphisms.get(i);
-                Morphisms g = morphisms.get(j);
-                //recheck if we return the dom of the right side or not
-                State lefttSide = getState(stateB.get(tensorTable.getMorphism(f.name,g.name).name));
-                State rightSide = getState(stateB.get(tensorTable.getMorphism(f.stateB.getIdentityMorphism().name,g.stateB.getIdentityMorphism().name).name));
-
-                if(!lefttSide.name.equals(rightSide.name)){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
-
-
-    /**
-     *
-     * Property to check:
-     * id(A) * id(B) = id(A *B)
-     *
-     *
-     * checks if the category satisfies the monoidal identity property
-     * TODO check if the rhs means that the product of the lhs must just satisfy the identity properties of not(Current Undestanding)
-     *
-     *
-     * Identity Morphism Properties:
-     *     Maps an object onto itself
-     *     each object can only have one
-     *     left and right associative
-     *
-     * @param tensorTable a table representing the tensortable of the category
-     * @return boolean if the category satisfies the property or not
-     */
-    public static boolean checkIndetitesMonoidal(Table tensorTable){
-        for(int i=0;i<identityNames.size();i++){
-            for( int j=0;j<identityNames.size();j++){
-                System.out.println(identityNames.get(j));
-
-                Morphisms a = morphismNames.get(identityNames.get(i));
-                Morphisms b = morphismNames.get(identityNames.get(j));
-                System.out.println("MOr a : "+ a.name);
-                System.out.println("Mor b : "+ b.name);
-
-
-                Morphisms lhs = tensorTable.getMorphism(a.name,b.name);
-                if(!identityNames.contains(lhs.name)){
-                    return false;
-                }
-
-
-
-            }
-        }
-        return true;
-    }
 
     //there exists ID(a) where f * ID(a)  = f  = ID(a) * f for every morphism f
-
-    public static boolean checkUniqueIden(Table tensorTable){
-        for(int i=0;i<identityNames.size();i++){
-            String currIden = identityNames.get(i);
-            boolean valid = true;
-            for(int j=0;j<morphisms.size();j++){
-
-                String currMorphism = morphisms.get(j).name;
-                if(!tensorTable.getMorphism(currIden,currMorphism).name.equals(currMorphism)){
-                    valid = false;
-                }
-                if(!tensorTable.getMorphism(currMorphism,currIden).name.equals(currMorphism)){
-                    valid = false;
-                }
-
-
-
-            }
-            if(valid){
-                return true;
-            }
-
-
-
-        }
-        return false;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     //    /**
