@@ -1,5 +1,5 @@
 # Tool To Explore Finite Monoidal Categories
-## Introduction
+## About
 Category theory is the general theory of mathematical structures. Monoidal
 categories is a subsection of category theory which generalises finite monoids. While
 monoidal categories are more generally represented as a collection of objects, morphisms and a tensor product, if we regard them as a combinatorial object, they can be
